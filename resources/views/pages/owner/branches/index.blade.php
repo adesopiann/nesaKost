@@ -19,7 +19,6 @@
             <p class="text-sm text-slate-500">Total Cabang Kos</p>
             <div class="mt-3 flex items-end justify-between">
                 <p class="text-3xl font-bold">{{ $totalBranches }} <span class="text-base font-medium text-slate-500">Cabang</span></p>
-                <span class="rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">Milik Anda</span>
             </div>
         </div>
         <div class="rounded-xl bg-white p-5 shadow-sm">

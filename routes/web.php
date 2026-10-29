@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\BranchDormController;
+use App\Http\Controllers\Owner\RoomController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
@@ -42,8 +43,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
-         Route::resource('branches', BranchDormController::class)
+        Route::resource('branches', BranchDormController::class)
             ->parameters(['branches' => 'branch']);
+
+        Route::resource('rooms', RoomController::class)->names('rooms');
     });
 
     // // MANAGER

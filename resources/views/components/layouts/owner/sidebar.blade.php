@@ -2,7 +2,7 @@
     $menu = [
         ['label' => 'Dashboard', 'url' => '/owner/dashboard', 'match' => 'owner/dashboard', 'icon' => 'grid'],
         ['label' => 'Data Cabang Kos', 'url' => '/owner/branches', 'match' => 'owner/branches*', 'icon' => 'home'],
-        ['label' => 'Data Kamar', 'url' => '/owner/kamar', 'match' => 'owner/kamar*', 'icon' => 'columns'],
+        ['label' => 'Data Kamar', 'url' => '/owner/rooms', 'match' => 'owner/rooms*', 'icon' => 'columns'],
         ['label' => 'Data Penyewa', 'url' => '/owner/penyewa', 'match' => 'owner/penyewa*', 'icon' => 'users'],
         ['label' => 'Data Sewa', 'url' => '/owner/sewa', 'match' => 'owner/sewa*', 'icon' => 'clipboard'],
         [

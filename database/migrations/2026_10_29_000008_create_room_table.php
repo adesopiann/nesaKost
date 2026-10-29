@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+         if (Schema::hasTable('room')) {
+            return;
+        }
+    
         Schema::create('room', function (Blueprint $table) {
             $table->id();
             $table->string('room_code', 20)->unique()->comment('Diisi manual');

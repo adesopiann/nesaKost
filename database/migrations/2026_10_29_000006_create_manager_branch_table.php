@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('manager_id');
             $table->unsignedBigInteger('branch_dorm_id');
             $table->unsignedBigInteger('owner_id');
+            $table->timestamps();
 
             $table->primary(['manager_id', 'branch_dorm_id'], 'manager_branch_primary');
             $table->index(['manager_id', 'owner_id'], 'manager_branch_manager_owner_index');

@@ -37,21 +37,18 @@
                         'value' => $stats['branches'],
                         'entity' => 'cabang',
                         'icon' => 'grid',
-                        'note' => 'Cabang terdaftar',
                     ],
                     [
                         'label' => 'Total Kamar',
                         'value' => $stats['rooms'],
                         'entity' => 'kamar',
                         'icon' => 'columns',
-                        'note' => 'Kamar terdata',
                     ],
                     [
                         'label' => 'Total Penyewa',
                         'value' => $stats['tenants'],
                         'entity' => 'penyewa',
                         'icon' => 'user-check',
-                        'note' => 'Penyewa terdaftar',
                     ],
                 ];
             @endphp
@@ -68,7 +65,6 @@
                             class="text-3xl font-bold tracking-tight text-slate-900">{{ number_format($card['value']) }}</span>
                         <span class="text-xs font-medium text-slate-500">{{ $card['entity'] }}</span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500">{{ $card['note'] }}</p>
                 </article>
             @endforeach
         </section>
@@ -76,8 +72,7 @@
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800"><span
-                            class="h-2 w-2 rounded-full bg-[#1D4E80]"></span>Okupansi Kamar per Cabang</h2>
+                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Okupansi Kamar per Cabang</h2>
                     <p class="mt-1 max-w-2xl text-xs leading-5 text-slate-500">Dihitung dari jumlah kamar dan data sewa
                         aktif yang tanggal sewanya mencakup hari ini.</p>
                 </div>
@@ -115,19 +110,13 @@
                             </article>
                         @endforeach
                     </div>
-                    <p class="mt-4 text-[11px] leading-5 text-slate-500">Kamar kosong dihitung dari total kamar dikurangi
-                        kamar yang memiliki sewa aktif. Pastikan status sewa di database menggunakan nilai
-                        <code>active</code>.
-                    </p>
                 </div>
             @endif
         </section>
 
         <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
             <article class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
-                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800"><span
-                        class="h-2 w-2 rounded-full bg-[#1D4E80]"></span>Ringkasan Data Sewa</h2>
-                <p class="mt-1 text-xs text-slate-500">Ringkasan berdasarkan data pada tabel rent.</p>
+                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Data Sewa</h2>
 
                 <div class="mt-5 grid grid-cols-3 gap-2">
                     <div class="rounded-lg bg-[#F0F3FF] p-3">
@@ -168,8 +157,7 @@
             </article>
 
             <article class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
-                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800"><span
-                        class="h-2 w-2 rounded-full bg-emerald-700"></span>Ringkasan Pembayaran</h2>
+                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Pembayaran</h2>
                 <p class="mt-1 text-xs text-slate-500">Akumulasi pembayaran dengan tanggal pembayaran terisi.</p>
                 <div class="mt-5 rounded-lg bg-[#F0F3FF] p-4">
                     <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Total Pembayaran Tercatat
@@ -210,10 +198,7 @@
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800"><span
-                            class="h-2 w-2 rounded-full bg-blue-700"></span>Pendapatan Bulanan per Cabang</h2>
-                    <p class="mt-1 text-xs leading-5 text-slate-500">Akumulasi pembayaran yang memiliki paid_at pada tahun
-                        {{ $year }}. Nominal ditampilkan dalam rupiah.</p>
+                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Pendapatan Bulanan per Cabang</h2>
                 </div>
                 <span class="rounded-md bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#315F96]">Tahun
                     {{ $year }}</span>
@@ -223,8 +208,6 @@
                     <canvas id="monthlyRevenueChart"
                         aria-label="Grafik pendapatan bulanan per cabang untuk tahun {{ $year }}"></canvas>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-500">Sumber: tabel payment → booking → room → branch_dorm. Pembayaran
-                    dihitung jika kolom paid_at tidak NULL.</p>
             </div>
         </section>
 
@@ -286,7 +269,7 @@
             </div>
         </section>
 
-        <p class="text-center text-[11px] text-slate-400">Dashboard eKost · Statistik dan grafik diperoleh dari database.
+        <p class="text-center text-[11px] text-slate-400">&copy; 2026 nesaKost. All rights reserved.
         </p>
     </div>
 @endsection

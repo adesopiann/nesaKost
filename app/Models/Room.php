@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\RoomImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Room extends Model
 {
@@ -62,5 +64,16 @@ class Room extends Model
     public function rents(): HasMany
     {
         return $this->hasMany(Rent::class, 'room_id');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(RoomImage::class, 'room_id');
+    }
+
+    public function firstImage(): HasOne
+    {
+        return $this->hasOne(RoomImage::class, 'room_id')
+            ->oldestOfMany('id');
     }
 }
