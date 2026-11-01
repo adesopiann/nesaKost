@@ -15,19 +15,33 @@
             <p class="mt-1 text-sm text-slate-500">Ringkasan operasional pengelolaan kos.</p>
         </section>
 
+
+
         <section class="flex flex-col gap-3 rounded-xl border border-slate-100 bg-white p-3 sm:flex-row sm:items-center">
             <div class="flex flex-wrap gap-2">
-                <button type="button" data-branch-filter="all"
-                    class="branch-filter rounded-lg bg-[#1D4E80] px-3 py-2 text-xs font-semibold text-white">Semua
-                    Cabang</button>
-                @foreach ($branchOccupancy as $branch)
-                    <button type="button" data-branch-filter="{{ $branch['id'] }}"
-                        class="branch-filter rounded-lg bg-[#F0F3FF] px-3 py-2 text-xs font-medium text-slate-600 hover:bg-blue-100">
-                        {{ $branch['name'] }}
-                    </button>
+
+                {{-- Semua Cabang --}}
+                <a href="{{ route('owner.dashboard') }}"
+                    class="rounded-lg px-3 py-2 text-xs font-semibold transition
+            {{ $selectedBranchId === null ? 'bg-[#1D4E80] text-white' : 'bg-[#F0F3FF] text-slate-600 hover:bg-blue-100' }}">
+                    Semua Cabang
+                </a>
+
+                {{-- Seluruh Cabang Milik Owner --}}
+                @foreach ($branches as $branch)
+                    <a href="{{ route('owner.dashboard', ['branch_id' => $branch->id]) }}"
+                        class="rounded-lg px-3 py-2 text-xs font-medium transition
+                {{ $selectedBranchId === (string) $branch->id
+                    ? 'bg-[#1D4E80] text-white font-semibold'
+                    : 'bg-[#F0F3FF] text-slate-600 hover:bg-blue-100' }}">
+                        {{ $branch->name }}
+                    </a>
                 @endforeach
+
             </div>
         </section>
+
+
 
         <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @php
@@ -72,7 +86,8 @@
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Okupansi Kamar per Cabang</h2>
+                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Okupansi Kamar per Cabang
+                    </h2>
                     <p class="mt-1 max-w-2xl text-xs leading-5 text-slate-500">Dihitung dari jumlah kamar dan data sewa
                         aktif yang tanggal sewanya mencakup hari ini.</p>
                 </div>
@@ -198,7 +213,8 @@
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Pendapatan Bulanan per Cabang</h2>
+                    <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Pendapatan Bulanan per Cabang
+                    </h2>
                 </div>
                 <span class="rounded-md bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#315F96]">Tahun
                     {{ $year }}</span>
@@ -413,27 +429,6 @@
                     });
                 }
             }
-
-            // Filter cabang pada grafik okupansi.
-            const filterButtons = document.querySelectorAll('.branch-filter');
-            const occupancyCards = document.querySelectorAll('.occupancy-card');
-            filterButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const selected = button.dataset.branchFilter;
-                    filterButtons.forEach(function(item) {
-                        item.classList.remove('bg-[#1D4E80]', 'text-white',
-                            'font-semibold');
-                        item.classList.add('bg-[#F0F3FF]', 'text-slate-600', 'font-medium');
-                    });
-                    button.classList.remove('bg-[#F0F3FF]', 'text-slate-600', 'font-medium');
-                    button.classList.add('bg-[#1D4E80]', 'text-white', 'font-semibold');
-
-                    occupancyCards.forEach(function(card) {
-                        card.classList.toggle('hidden', selected !== 'all' && card.dataset
-                            .branch !== selected);
-                    });
-                });
-            });
 
             // Pencarian pembayaran terbaru.
             const searchInput = document.getElementById('dashboard-search');
