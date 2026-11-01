@@ -9,6 +9,7 @@ use App\Http\Controllers\Customer\PropertyController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', [HomeController::class, 'index'])
+    ->middleware('redirect.authenticated')  
     ->name('customer.home');
 
 Route::get('/kost/{id}', [PropertyController::class, 'show'])
