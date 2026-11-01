@@ -36,6 +36,22 @@
                 <p class="mt-2 leading-relaxed">{{ $branch->address }}</p>
             </div>
             <div>
+                    <p class="text-sm font-semibold text-slate-500">Kategori kost</p>
+                    <p class="mt-2 font-medium capitalize">{{ $branch->gender_type ?: 'Belum ditentukan' }}</p>
+            </div>
+             <div>
+                    <p class="text-sm font-semibold text-slate-500">Koordinat lokasi</p>
+                    @if ($branch->latitude !== null && $branch->longitude !== null)
+                        <p class="mt-2 text-sm">{{ $branch->latitude }}, {{ $branch->longitude }}</p>
+                        <a class="mt-2 inline-flex text-sm font-semibold text-blue-800 hover:underline"
+                            href="https://www.openstreetmap.org/?mlat={{ $branch->latitude }}&mlon={{ $branch->longitude }}#map=18/{{ $branch->latitude }}/{{ $branch->longitude }}"
+                            target="_blank" rel="noopener noreferrer">Lihat titik di OpenStreetMap ↗</a>
+                    @else
+                        <p class="mt-2 text-sm text-amber-600">Lokasi belum ditentukan. Lengkapi melalui menu Edit Cabang.
+                        </p>
+                    @endif
+            </div>
+            <div>
                 <p class="text-sm font-semibold text-slate-500">Pemilik properti</p>
                 <p class="mt-2 font-medium">{{ $branch->owner?->user ? trim($branch->owner->user->fname . ' ' . $branch->owner->user->lname) : 'Pemilik tidak ditemukan' }}</p>
                 @if($branch->owner?->user)

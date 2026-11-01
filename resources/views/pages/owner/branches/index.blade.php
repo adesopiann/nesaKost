@@ -51,9 +51,11 @@
                 <thead class="bg-indigo-50 text-xs uppercase tracking-wide text-slate-600">
                     <tr>
                         <th class="px-6 py-4">Nama Cabang</th>
-                        <th class="px-6 py-4">Alamat Lengkap</th>
+                        <th class="px-6 py-4">Alamat</th>
+                        <th class="px-6 py-4">Kategori</th>
                         <th class="px-6 py-4 text-center">Kapasitas</th>
-                        <th class="px-6 py-4">Fasilitas Umum</th>
+                        <th class="px-6 py-4">Fasilitas</th>
+                        <th class="px-6 py-4">Lokasi</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
@@ -66,6 +68,13 @@
                                 <p class="mt-1 text-xs text-blue-800">{{ $branch->branch_code }}</p>
                             </td>
                             <td class="max-w-xs px-6 py-5 text-slate-500">{{ \Illuminate\Support\Str::limit($branch->address, 100) }}</td>
+                            <td class="px-6 py-5">
+                                    @if ($branch->gender_type)
+                                        <span
+                                        class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold capitalize text-indigo-800">{{ $branch->gender_type }}</span>@else<span
+                                            class="text-xs text-amber-600">Belum diatur</span>
+                                    @endif
+                                </td>
                             <td class="px-6 py-5 text-center font-semibold">{{ $branch->rooms_count }} kamar</td>
                             <td class="px-6 py-5">
                                 <div class="flex max-w-sm flex-wrap gap-1.5">
@@ -78,6 +87,12 @@
                                         <span class="rounded-md bg-slate-100 px-2 py-1 text-xs">+{{ $branch->facilities->count() - 4 }}</span>
                                     @endif
                                 </div>
+                            </td>
+                             <td class="px-6 py-5">
+                                    @if ($branch->latitude !== null && $branch->longitude !== null)
+                                    <span class="text-xs font-medium text-emerald-700">Titik tersimpan</span>@else<span
+                                            class="text-xs font-medium text-amber-600">Belum ditentukan</span>
+                                    @endif
                             </td>
                             <td class="px-6 py-5">
                                 <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $branch->status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">

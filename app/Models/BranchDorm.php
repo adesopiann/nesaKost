@@ -15,6 +15,9 @@ class BranchDorm extends Model
         'owner_id',
         'name',
         'address',
+        'latitude',
+        'longitude',
+        'gender_type',
         'image_path',
         'status',
     ];
@@ -43,4 +46,13 @@ class BranchDorm extends Model
     {
         return 'CBG-' . str_pad((string) $this->id, 3, '0', STR_PAD_LEFT);
     }
+
+        protected function casts(): array
+    {
+        return [
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
+        ];
+    }
+
 }

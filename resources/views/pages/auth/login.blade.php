@@ -7,8 +7,8 @@
             <a href="{{ url('/') }}" class="mb-8 inline-flex items-center gap-3">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1D4E80] text-white"><i
                         data-feather="grid" class="h-5 w-5"></i></span>
-                <span><span class="block text-lg font-bold text-slate-900">eKost</span><span
-                        class="block text-xs text-slate-500">Integrated Kos Management</span></span>
+                <span><span class="block text-lg font-bold text-slate-900">nesaKost</span><span
+                        class="block text-xs text-slate-500">Platform Pencarian dan Manajemen Kost untuk Mahasiswa UNESA</span></span>
             </a>
 
             <section
@@ -16,7 +16,7 @@
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#315F96]"><i
                         data-feather="log-in" class="h-6 w-6"></i></div>
                 <h1 class="mt-5 text-2xl font-bold tracking-tight text-slate-900">Selamat datang kembali</h1>
-                <p class="mt-2 text-sm leading-6 text-slate-500">Login untuk melanjutkan ke akun eKost kamu.</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">Login untuk melanjutkan ke akun nesaKost kamu.</p>
 
                 @if (session('success'))
                     <div class="mt-5 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">

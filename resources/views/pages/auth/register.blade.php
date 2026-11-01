@@ -11,8 +11,8 @@
             <a href="{{ url('/') }}" class="mb-7 inline-flex items-center gap-3">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1D4E80] text-white"><i
                         data-feather="grid" class="h-5 w-5"></i></span>
-                <span><span class="block text-lg font-bold text-slate-900">eKost</span><span
-                        class="block text-xs text-slate-500">Integrated Kos Management</span></span>
+                <span><span class="block text-lg font-bold text-slate-900">nesaKost</span><span
+                        class="block text-xs text-slate-500">Platform Pencarian dan Manajemen Kost untuk Mahasiswa UNESA</span></span>
             </a>
 
             <section
@@ -27,7 +27,7 @@
                         <p class="text-xs font-semibold uppercase tracking-wider text-[#315F96]">Pendaftaran
                             {{ $roleLabel }}</p>
                         <h1 class="mt-1 text-2xl font-bold text-slate-900">Buat akun baru</h1>
-                        <p class="mt-1 text-sm text-slate-500">Lengkapi informasi berikut untuk mulai menggunakan eKost.</p>
+                        <p class="mt-1 text-sm text-slate-500">Lengkapi informasi berikut untuk mulai menggunakan nesaKost.</p>
                     </div>
                 </div>
 

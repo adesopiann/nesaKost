@@ -4,11 +4,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\BranchDormController;
 use App\Http\Controllers\Owner\RoomController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\PropertyController;
 use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])
+    ->name('customer.home');
+
+Route::get('/kost/{id}', [PropertyController::class, 'show'])
+    ->whereNumber('id')
+    ->name('customer.properties.show');
+
 
 Route::middleware('guest')->group(function () {
     Route::get('/register/role', [AuthController::class, 'chooseRole'])
@@ -42,11 +48,17 @@ Route::middleware('auth')->group(function () {
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+        
+        Route::get('/branches/geocode', [BranchDormController::class, 'geocode'])
+            ->middleware('throttle:5,1')
+            ->name('branches.geocode');
 
         Route::resource('branches', BranchDormController::class)
             ->parameters(['branches' => 'branch']);
 
         Route::resource('rooms', RoomController::class)->names('rooms');
+
+        
     });
 
     // // MANAGER

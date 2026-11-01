@@ -11,8 +11,8 @@
             <a href="{{ url('/') }}" class="mb-8 inline-flex items-center gap-3">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1D4E80] text-white"><i
                         data-feather="grid" class="h-5 w-5"></i></span>
-                <span><span class="block text-lg font-bold text-slate-900">eKost</span><span
-                        class="block text-xs text-slate-500">Integrated Kos Management</span></span>
+                <span><span class="block text-lg font-bold text-slate-900">nesaKost</span><span
+                        class="block text-xs text-slate-500">Platform Pencarian dan Manajemen Kost untuk Mahasiswa UNESA</span></span>
             </a>
 
             <section
@@ -20,11 +20,11 @@
                 <div class="mx-auto max-w-xl text-center">
                     <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#315F96]"><i
                             data-feather="user-plus" class="h-6 w-6"></i></span>
-                    <p class="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#315F96]">Buat akun eKost</p>
+                    <p class="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#315F96]">Buat akun nesaKost</p>
                     <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Kamu ingin bergabung
                         sebagai apa?</h1>
                     <p class="mt-3 text-sm leading-6 text-slate-500">Pilih jenis akun. Pilihan ini akan menentukan role
-                        akunmu di eKost.</p>
+                        akunmu di nesaKost.</p>
                 </div>
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
@@ -55,8 +55,6 @@
 
                 <p class="mt-8 text-center text-sm text-slate-500">Sudah punya akun? <a href="{{ route('login') }}"
                         class="font-semibold text-[#315F96] hover:underline">Login</a></p>
-                <p class="mt-5 text-center text-xs text-slate-400">Akun manager dibuat oleh owner atau administrator, bukan
-                    melalui pendaftaran publik.</p>
             </section>
         </main>
     </div>
