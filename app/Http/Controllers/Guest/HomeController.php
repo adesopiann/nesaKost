@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\BranchDorm;
@@ -29,7 +29,7 @@ class HomeController extends Controller
             $lng = (float) $longitude;
             $radius = (float) config('ekost.search_radius', 5);
             $activeStatus = config('ekost.property_active_status', 'active');
-            $availableStatus = config('ekost.room_available_status', 'available');
+            $roomActiveStatus = config('ekost.room_active_status', 'active');
 
             $distanceSql = <<<'SQL'
                 (
@@ -50,17 +50,17 @@ class HomeController extends Controller
                 ->selectRaw("$distanceSql AS distance", [$lat, $lng, $lat])
                 ->withMin([
                     'rooms as starting_price' => fn ($query) =>
-                        $query->where('status', $availableStatus),
+                        $query->where('status', $roomActiveStatus),
                 ], 'monthly_price')
                 ->withCount([
                     'rooms as available_rooms_count' => fn ($query) =>
-                        $query->where('status', $availableStatus),
+                        $query->where('status', $roomActiveStatus),
                 ])
                 ->where('branch_dorm.status', $activeStatus)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->whereHas('rooms', fn ($query) =>
-                    $query->where('status', $availableStatus)
+                    $query->where('status', $roomActiveStatus)
                 )
                 ->whereRaw("$distanceSql <= ?", [$lat, $lng, $lat, $radius])
                 ->when(
@@ -81,7 +81,7 @@ class HomeController extends Controller
             );
         }
 
-        return view('customer.home', [
+        return view('pages.guest.index', [
             'properties' => $properties,
             'campus' => $campus,
             'campusKey' => $campusKey,

@@ -25,5 +25,5 @@ return [
 
     // Sesuaikan jika nilai status di database berbeda.
     'property_active_status' => 'active',
-    'room_available_status' => 'available',
+    'room_active_status' => 'active',
 ];

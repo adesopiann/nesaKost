@@ -119,7 +119,7 @@ class AuthController extends Controller
         $destination = match ($request->user()->role) {
             'owner' => '/owner/dashboard',
             'manager' => '/manager/dashboard',
-            'tenant' => '/tenant/dashboard',
+            'tenant' => '/',
             default => null,
         };
 
@@ -142,7 +142,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('customer.home')
+        return redirect()->route('guest.home')
             ->with('success', 'Kamu berhasil keluar dari akun.');
     }
 }

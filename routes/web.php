@@ -4,17 +4,22 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\BranchDormController;
 use App\Http\Controllers\Owner\RoomController;
-use App\Http\Controllers\Customer\HomeController;
-use App\Http\Controllers\Customer\PropertyController;
+
+use App\Http\Controllers\Guest\HomeController;
+use App\Http\Controllers\Guest\PropertyController;
+
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\Tenant\DashboardController as TenantDashboardController;
+use App\Http\Controllers\Tenant\BookingController;
+use App\Http\Controllers\Tenant\PaymentController;
+
 Route::get('/', [HomeController::class, 'index'])
-    ->middleware('redirect.authenticated')  
-    ->name('customer.home');
+    ->name('guest.home');
 
 Route::get('/kost/{id}', [PropertyController::class, 'show'])
     ->whereNumber('id')
-    ->name('customer.properties.show');
+    ->name('guest.properties.show');
 
 
 Route::middleware('guest')->group(function () {
@@ -43,9 +48,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
 
     // OWNER
-    Route::middleware(['auth', 'role:owner'])
-    ->prefix('owner')
+    Route::prefix('owner')
     ->name('owner.')
+    ->middleware('role:owner')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
@@ -73,15 +78,31 @@ Route::middleware('auth')->group(function () {
     //         // Tambahkan route operasional cabang di sini.
     //     });
 
-    // // TENANT
-    // Route::prefix('tenant')
-    //     ->name('tenant.')
-    //     ->middleware('role:tenant')
-    //     ->group(function () {
-    //         Route::get('/dashboard', function () {
-    //             return view('tenant.dashboard');
-    //         })->name('dashboard');
+    // TENANT
+    Route::prefix('tenant')
+        ->name('tenant.')
+        ->middleware('role:tenant')
+        ->group(function () {
+           Route::get('/dashboard', [TenantDashboardController::class, 'index'])
+                ->name('dashboard');
+            
+            Route::post('/bookings', [BookingController::class, 'store'])
+                ->name('bookings.store');
 
-    //         // Tambahkan route booking, sewa, dan pembayaran di sini.
-    //     });
+            Route::get('/bookings/{id}', [BookingController::class, 'show'])
+                ->whereNumber('id')
+                ->name('bookings.show');
+
+            Route::post(
+                    '/bookings/{bookingId}/payments/{paymentId}/simulate',
+                    [PaymentController::class, 'simulate']
+                )
+                    ->whereNumber('bookingId')
+                    ->whereNumber('paymentId')
+                    ->name('bookings.payments.simulate');
+        
+
+
+            // Tambahkan route booking, sewa, dan pembayaran di sini.
+        });
 });

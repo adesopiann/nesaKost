@@ -20,13 +20,13 @@
     @stack('styles')
 </head>
 <body class="bg-white text-slate-800 antialiased">
-    @include('components.customer.navbar')
+    @include('components.layouts.guest.navbar')
 
     <main>
         @yield('content')
     </main>
 
-    @include('components.customer.footer')
+    @include('components.layouts.guest.footer')
 
     @stack('scripts')
 </body>

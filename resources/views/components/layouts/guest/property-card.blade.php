@@ -1,7 +1,7 @@
 @props(['property'])
 
 <div class="group overflow-hidden rounded-xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-    <a href="{{ route('customer.properties.show', $property->id) }}">
+    <a href="{{ route('guest.properties.show', $property->id) }}">
         <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
             @if($property->image_path)
                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($property->image_path) }}"
@@ -20,7 +20,7 @@
         <div class="p-4">
             <div class="mb-2 flex items-start justify-between gap-2">
                 <h3 class="font-semibold text-slate-800 transition group-hover:text-blue-900">{{ $property->name }}</h3>
-                <span class="shrink-0 rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">Tersedia</span>
+                <span class="shrink-0 rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">Lihat pilihan kamar</span>
             </div>
 
             <p class="mb-3 line-clamp-2 text-sm text-slate-500">{{ $property->address }}</p>
