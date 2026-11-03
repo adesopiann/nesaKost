@@ -64,7 +64,8 @@
                             <th class="px-6 py-4">Cabang</th>
                             <th class="px-6 py-4">Tipe</th>
                             <th class="px-6 py-4">Harga / Bulan</th>
-                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Status Oprasional</th>
+                            <th class="px-6 py-4">Ketersediaan</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -72,55 +73,60 @@
                         @forelse($rooms as $room)
                             <tr class="hover:bg-slate-50">
                                 <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        @php
-                                            $primaryImage = $room->primaryImage;
-                                        @endphp
+                                    @php
+                                        $operationalClasses = [
+                                            'active' => 'bg-emerald-100 text-emerald-800',
+                                            'inactive' => 'bg-slate-100 text-slate-600',
+                                            'maintenance' => 'bg-amber-100 text-amber-800',
+                                        ];
 
-                                        @if ($room->firstImage)
-                                            <img src="{{ asset('storage/' . $room->firstImage->image_path) }}"
-                                                alt="Foto {{ $room->room_code }}"
-                                                class="h-14 w-16 rounded-lg object-cover">
-                                        @else
-                                            <div
-                                                class="flex h-14 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
-                                                Foto tidak tersedia
-                                            </div>
-                                        @endif
-                                        <div><a href="{{ route('owner.rooms.show', $room->id) }}"
-                                                class="font-semibold text-slate-900 hover:text-blue-800">{{ $room->room_code }}</a>
-                                            <p class="mt-1 text-xs text-slate-500">{{ $room->images->count() }} foto · ID:
-                                                {{ $room->id }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5">{{ $room->branch?->name ?? '—' }}</td>
-                                <td class="px-6 py-5">{{ $room->type }}</td>
-                                <td class="px-6 py-5 font-semibold">Rp
-                                    {{ number_format((float) $room->monthly_price, 0, ',', '.') }}</td>
-                                <td class="px-6 py-5">
-                                    @php($statusClasses = ['available' => 'bg-emerald-100 text-emerald-800', 'occupied' => 'bg-blue-100 text-blue-800', 'maintenance' => 'bg-amber-100 text-amber-800', 'inactive' => 'bg-slate-100 text-slate-600'])
-                                    @php($statusLabels = ['available' => 'Tersedia', 'occupied' => 'Terisi', 'maintenance' => 'Perawatan', 'inactive' => 'Nonaktif'])
+                                        $operationalLabels = [
+                                            'active' => 'Aktif',
+                                            'inactive' => 'Nonaktif',
+                                            'maintenance' => 'Perawatan',
+                                        ];
+                                    @endphp
+
                                     <span
-                                        class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $statusClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">{{ $statusLabels[$room->status] ?? ucfirst($room->status) }}</span>
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold
+        {{ $operationalClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">
+                                        {{ $operationalLabels[$room->status] ?? ucfirst($room->status) }}
+                                    </span>
                                 </td>
+
                                 <td class="px-6 py-5">
-                                    <div class="flex justify-end gap-3">
-                                        <a href="{{ route('owner.rooms.show', $room->id) }}"
-                                            class="font-semibold text-blue-800 hover:underline">Detail</a>
-                                        <a href="{{ route('owner.rooms.edit', $room->id) }}"
-                                            class="font-semibold text-slate-700 hover:underline">Edit</a>
-                                        <form method="POST" action="{{ route('owner.rooms.destroy', $room->id) }}"
-                                            onsubmit="return confirm('Yakin ingin menghapus kamar ini?')">
-                                            @csrf @method('DELETE')
-                                            <button class="font-semibold text-red-600 hover:underline">Hapus</button>
-                                        </form>
-                                    </div>
+                                    @php
+                                        $availability = $room->availability ?? [];
+                                        $availabilityStatus = $availability['status'] ?? 'unavailable';
+
+                                        $availabilityClasses = [
+                                            'available' => 'bg-emerald-100 text-emerald-800',
+                                            'occupied' => 'bg-blue-100 text-blue-800',
+                                            'reserved' => 'bg-indigo-100 text-indigo-800',
+                                            'renewal_priority' => 'bg-amber-100 text-amber-800',
+                                            'unavailable' => 'bg-slate-100 text-slate-600',
+                                        ];
+
+                                        $availabilityLabels = [
+                                            'available' => 'Tersedia',
+                                            'occupied' => 'Terisi',
+                                            'reserved' => 'Dipesan',
+                                            'renewal_priority' => 'Prioritas Renewal',
+                                            'unavailable' => 'Tidak Tersedia',
+                                        ];
+                                    @endphp
+
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold
+        {{ $availabilityClasses[$availabilityStatus] ?? 'bg-slate-100 text-slate-600' }}">
+                                        {{ $availabilityLabels[$availabilityStatus] ?? ucfirst($availabilityStatus) }}
+                                    </span>
                                 </td>
+
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-16 text-center text-slate-500">Belum ada data kamar yang
+                                <td colspan="7" class="px-6 py-16 text-center text-slate-500">Belum ada data kamar yang
                                     cocok.</td>
                             </tr>
                         @endforelse

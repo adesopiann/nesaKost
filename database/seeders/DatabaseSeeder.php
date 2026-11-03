@@ -216,19 +216,19 @@ class DatabaseSeeder extends Seeder
              */
             $roomDefinitions = [
                 [0, 'A-101', 'Single', 900000, 'active'],
-                [0, 'A-102', 'Single', 950000, 'occupied'],
-                [0, 'A-103', 'Deluxe', 1400000, 'occupied'],
+                [0, 'A-102', 'Single', 950000, 'active'],
+                [0, 'A-103', 'Deluxe', 1400000, 'active'],
                 [0, 'A-104', 'Deluxe', 1450000, 'active'],
                 [0, 'A-105', 'Single', 850000, 'maintenance'],
 
-                [1, 'B-201', 'Single', 800000, 'occupied'],
-                [1, 'B-202', 'Deluxe', 1300000, 'occupied'],
+                [1, 'B-201', 'Single', 800000, 'active'],
+                [1, 'B-202', 'Deluxe', 1300000, 'active'],
                 [1, 'B-203', 'Deluxe', 1350000, 'active'],
                 [1, 'B-204', 'Suite', 1800000, 'active'],
                 [1, 'B-205', 'Single', 825000, 'inactive'],
 
-                [2, 'C-301', 'Single', 875000, 'occupied'],
-                [2, 'C-302', 'Deluxe', 1250000, 'occupied'],
+                [2, 'C-301', 'Single', 875000, 'active'],
+                [2, 'C-302', 'Deluxe', 1250000, 'active'],
                 [2, 'C-303', 'Suite', 1750000, 'active'],
                 [2, 'C-304', 'Single', 900000, 'active'],
                 [2, 'C-305', 'Deluxe', 1300000, 'active'],
@@ -309,7 +309,9 @@ class DatabaseSeeder extends Seeder
                 $room = $rooms[$roomCode];
                 $startDate = Carbon::now()->startOfMonth()->subMonths($monthsAgo)->addDays(4);
                 $endDate = $startDate->copy()->addMonths($duration);
-                $createdAt = $startDate->copy()->subDays(14);
+                $createdAt = $bookingStatus === 'pending_payment'
+                    ? Carbon::now()->subMinutes(5)
+                    : $startDate->copy()->subDays(14);
                 $total = $room['price'] * $duration;
 
                 $bookingId = DB::table('booking')->insertGetId([
@@ -323,9 +325,9 @@ class DatabaseSeeder extends Seeder
                     'duration_month' => $duration,
                     'price_snapshot' => $room['price'],
                     'status' => $bookingStatus,
-                    'expires_at' => in_array($bookingStatus, ['pending_payment', 'expired'], true)
-                        ? $createdAt->copy()->addHours(24)
-                        : null,
+                    'expires_at' => $bookingStatus === 'pending_payment'
+                        ? Carbon::now()->addMinutes(25)
+                        : ($bookingStatus === 'expired' ? $createdAt->copy()->addMinutes(30) : null),
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
                 ]);
@@ -342,7 +344,7 @@ class DatabaseSeeder extends Seeder
                     'status' => $paymentStatus,
                     'paid_at' => $paidAt,
                     'expires_at' => $paymentStatus === 'pending'
-                        ? $createdAt->copy()->addHours(24)
+                        ? Carbon::now()->addMinutes(25)
                         : null,
                     'created_at' => $createdAt,
                     'updated_at' => $paidAt ?? $createdAt,
@@ -399,7 +401,7 @@ class DatabaseSeeder extends Seeder
                 $renewalStart = $renewalBase['end_date']->copy();
                 $renewalDuration = 3;
                 $renewalEnd = $renewalStart->copy()->addMonths($renewalDuration);
-                $renewalCreatedAt = Carbon::now()->subDays(2);
+                $renewalCreatedAt = Carbon::now()->subMinutes(5);
 
                 $renewalBookingId = DB::table('booking')->insertGetId([
                     'booking_code' => null,
@@ -412,7 +414,7 @@ class DatabaseSeeder extends Seeder
                     'duration_month' => $renewalDuration,
                     'price_snapshot' => $room['price'],
                     'status' => 'pending_payment',
-                    'expires_at' => $renewalCreatedAt->copy()->addHours(24),
+                    'expires_at' => Carbon::now()->addMinutes(25),
                     'created_at' => $renewalCreatedAt,
                     'updated_at' => $renewalCreatedAt,
                 ]);
@@ -427,7 +429,7 @@ class DatabaseSeeder extends Seeder
                     'payment_method' => 'bank_transfer',
                     'status' => 'pending',
                     'paid_at' => null,
-                    'expires_at' => $renewalCreatedAt->copy()->addHours(24),
+                    'expires_at' => Carbon::now()->addMinutes(25),
                     'created_at' => $renewalCreatedAt,
                     'updated_at' => $renewalCreatedAt,
                 ]);

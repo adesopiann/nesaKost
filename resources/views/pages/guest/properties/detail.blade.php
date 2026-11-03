@@ -245,7 +245,7 @@
                                             {{ $availabilityCheck['message'] }}
                                         </p>
 
-                                        {{-- Tombol booking akan diintegrasikan pada tahap berikutnya. --}}
+                                        
                                         @if ($availabilityCheck['available'])
                                             <form action="{{ route('tenant.bookings.store') }}" method="POST"
                                                 class="mt-4">
