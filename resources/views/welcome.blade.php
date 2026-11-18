@@ -2162,6 +2162,7 @@
             }
         </style>
     @endif
+    <script src="https://unpkg.com/feather-icons@4.29.2"></script>
 </head>
 
 <body
@@ -2212,11 +2213,7 @@
                             <a href="https://laravel.com/docs" target="_blank"
                                 class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ml-1">
                                 <span>Documentation</span>
-                                <svg width="10" height="11" viewBox="0 0 10 11" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5">
-                                    <path d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001" stroke="currentColor"
-                                        stroke-linecap="square" />
-                                </svg>
+                                <i data-feather="external-link" class="h-3 w-3" aria-hidden="true"></i>
                             </a>
                         </span>
                     </li>
@@ -2233,11 +2230,7 @@
                             <a href="https://laracasts.com" target="_blank"
                                 class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ml-1">
                                 <span>Laracasts</span>
-                                <svg width="10" height="11" viewBox="0 0 10 11" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5">
-                                    <path d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001" stroke="currentColor"
-                                        stroke-linecap="square" />
-                                </svg>
+                                <i data-feather="external-link" class="h-3 w-3" aria-hidden="true"></i>
                             </a>
                         </span>
                     </li>
@@ -2256,11 +2249,7 @@
                     <a href="https://github.com/laravel/framework/blob/13.x/CHANGELOG.md" target="_blank"
                         class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ml-1">
                         <span>View changelog</span>
-                        <svg width="10" height="11" viewBox="0 0 10 11" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5">
-                            <path d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001" stroke="currentColor"
-                                stroke-linecap="square" />
-                        </svg>
+                        <i data-feather="external-link" class="h-3 w-3" aria-hidden="true"></i>
                     </a>
                 </p>
             </div>
@@ -2399,6 +2388,7 @@
     @if (Route::has('login'))
         <div class="h-14.5 hidden lg:block"></div>
     @endif
+<script>document.addEventListener("DOMContentLoaded", function () { if (window.feather) window.feather.replace(); });</script>
 </body>
 
 </html>

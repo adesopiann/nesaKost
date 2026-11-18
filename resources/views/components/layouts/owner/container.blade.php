@@ -8,7 +8,7 @@
     <title>@yield('title', 'Dashboard') - nesaKost</title>
 
     @vite(['resources/css/app.css', 'resources/js/main.js'])
-    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://unpkg.com/feather-icons@4.29.2"></script>
 </head>
 
 <body class="min-h-screen bg-[#F7F8FC] text-slate-800 antialiased">

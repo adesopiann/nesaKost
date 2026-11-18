@@ -14,6 +14,7 @@ use App\Http\Controllers\Tenant\DashboardController as TenantDashboardController
 use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\PaymentController;
 use App\Http\Controllers\Tenant\RenewalController;
+use App\Http\Controllers\Tenant\NotificationController;
 
 Route::get('/', [HomeController::class, 'index'])
     ->name('guest.home');
@@ -90,6 +91,11 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
            Route::get('/dashboard', [TenantDashboardController::class, 'index'])
                 ->name('dashboard');
+
+            Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+            Route::get('/notifications/{notificationId}/open', [NotificationController::class, 'open'])->name('notifications.open');
+            Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+            Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
             
             Route::post('/bookings', [BookingController::class, 'store'])
                 ->name('bookings.store');

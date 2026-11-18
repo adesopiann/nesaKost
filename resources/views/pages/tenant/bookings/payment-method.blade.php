@@ -37,7 +37,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <a href="{{ route('tenant.bookings.show', $booking->id) }}"
                class="inline-flex items-center gap-2 text-sm font-medium text-blue-900 transition hover:text-blue-700">
-                <span aria-hidden="true" class="font-semibold">←</span>
+                <i data-feather="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
                 Kembali ke detail booking
             </a>
 
@@ -114,7 +114,7 @@
                                                 <span class="mt-1 block text-xs leading-5 text-slate-500">{{ $descriptions[$code] }}</span>
                                             </span>
                                             <span class="hidden h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-900 text-white group-has-[:checked]:flex">
-                                                <span aria-hidden="true" class="font-semibold">✓</span>
+                                                <i data-feather="check" class="h-4 w-4" aria-hidden="true"></i>
                                             </span>
                                         </label>
                                     @endforeach
@@ -123,7 +123,7 @@
                         @endforeach
 
                         <div class="mt-7 flex gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-                            <span aria-hidden="true" class="font-semibold">✓</span>
+                            <i data-feather="check" class="h-4 w-4" aria-hidden="true"></i>
                             <p class="text-xs leading-5 text-slate-600">
                                 <strong class="font-semibold text-blue-950">Pembayaran simulasi.</strong>
                                 Nomor Virtual Account, QRIS, dan instruksi pada tahap berikutnya hanya untuk demonstrasi.
@@ -135,14 +135,14 @@
                     <button type="submit"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-900 px-5 py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-100">
                         Lanjutkan ke instruksi pembayaran
-                        <span aria-hidden="true" class="font-semibold">→</span>
+                        <i data-feather="arrow-right" class="h-4 w-4" aria-hidden="true"></i>
                     </button>
                 </form>
 
                 <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
                     <div class="flex items-center gap-2">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-900">
-                            <span aria-hidden="true" class="font-semibold">▤</span>
+                            <i data-feather="file-text" class="h-5 w-5" aria-hidden="true"></i>
                         </span>
                         <h2 class="text-base font-semibold text-slate-900">Ringkasan booking</h2>
                     </div>
@@ -175,7 +175,7 @@
 
                     <div class="mt-5 rounded-xl bg-slate-50 p-4">
                         <div class="flex items-start gap-2">
-                            <span aria-hidden="true" class="font-semibold">◷</span>
+                            <i data-feather="clock" class="h-4 w-4" aria-hidden="true"></i>
                             <p class="text-xs leading-5 text-slate-500">
                                 Selesaikan pembayaran sebelum
                                 <strong class="font-semibold text-slate-700">{{ $booking->expires_at?->format('d M Y, H:i') ?? '-' }} WIB</strong>.

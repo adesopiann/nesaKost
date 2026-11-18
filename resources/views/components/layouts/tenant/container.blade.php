@@ -7,6 +7,7 @@
     <meta name="description" content="Temukan kost dekat UNESA Kampus Ketintang dan Lidah Wetan dengan nesaKost.">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://unpkg.com/feather-icons@4.29.2"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +21,7 @@
     @stack('styles')
 </head>
 <body class="bg-white text-slate-800 antialiased">
-    @include('components.layouts.guest.navbar')
+    @include('components.layouts.tenant.navbar')
 
     <main>
         @yield('content')
@@ -28,6 +29,11 @@
 
     @include('components.layouts.guest.footer')
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.feather) window.feather.replace();
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

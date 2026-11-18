@@ -43,7 +43,7 @@
                     <a href="{{ route('owner.branches.index') }}" class="rounded-lg bg-slate-100 px-4 py-3 text-sm">Reset</a>
                 @endif
             </form>
-            <a href="{{ route('owner.branches.index') }}" title="Muat ulang" class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100">↻</a>
+            <a href="{{ route('owner.branches.index') }}" title="Muat ulang" aria-label="Muat ulang" class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100"><i data-feather="refresh-cw" class="h-4 w-4"></i></a>
         </div>
 
         <div class="overflow-x-auto">

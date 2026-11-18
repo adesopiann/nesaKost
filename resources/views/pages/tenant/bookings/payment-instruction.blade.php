@@ -17,7 +17,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <a href="{{ route('tenant.bookings.show', $booking->id) }}"
                class="inline-flex items-center gap-2 text-sm font-medium text-blue-900 transition hover:text-blue-700">
-                <span aria-hidden="true" class="font-semibold">←</span>
+                <i data-feather="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
                 Kembali ke detail booking
             </a>
 
@@ -51,7 +51,7 @@
                         <div class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 sm:px-5">
                             <div class="flex items-start gap-3">
                                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-amber-700 ring-1 ring-amber-100">
-                                    <span aria-hidden="true" class="font-semibold">◷</span>
+                                    <i data-feather="clock" class="h-5 w-5" aria-hidden="true"></i>
                                 </span>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">Selesaikan sebelum batas waktu</p>
@@ -78,7 +78,7 @@
                                 </div>
                                 <a href="{{ route('tenant.bookings.payments.create', $booking->id) }}"
                                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-900 transition hover:text-blue-700">
-                                    <span aria-hidden="true" class="font-semibold">↻</span>
+                                    <i data-feather="refresh-cw" class="h-4 w-4" aria-hidden="true"></i>
                                     Ubah metode
                                 </a>
                             </div>
@@ -91,7 +91,7 @@
                                         <button type="button"
                                                 data-copy="{{ $reference }}"
                                                 class="copy-button inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900">
-                                            <span aria-hidden="true" class="font-semibold">▢</span>
+                                            <i data-feather="copy" class="h-4 w-4" aria-hidden="true"></i>
                                             Salin
                                         </button>
                                     </div>
@@ -140,7 +140,7 @@
                                 <button type="button"
                                         data-copy="{{ number_format($amount, 0, ',', '.') }}"
                                         class="copy-button inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900">
-                                    <span aria-hidden="true" class="font-semibold">▢</span>
+                                    <i data-feather="copy" class="h-4 w-4" aria-hidden="true"></i>
                                     Salin nominal
                                 </button>
                             </div>
@@ -152,7 +152,7 @@
                                 <input type="hidden" name="outcome" value="success">
                                 <button type="submit"
                                         class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-900 px-4 py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-100">
-                                    <span aria-hidden="true" class="font-semibold">✓</span>
+                                    <i data-feather="check" class="h-4 w-4" aria-hidden="true"></i>
                                     Simulasikan pembayaran berhasil
                                 </button>
                             </form>
@@ -188,9 +188,7 @@
 
                             <div class="flex items-start gap-3">
                                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3h.008v.008H12v-.008ZM10.29 3.86 1.82 18.14A1.5 1.5 0 0 0 3.11 20.4h17.78a1.5 1.5 0 0 0 1.29-2.26L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-                                    </svg>
+                                    <i data-feather="alert-triangle" class="h-6 w-6" aria-hidden="true"></i>
                                 </div>
                                 <div class="min-w-0">
                                     <h3 id="cancelBookingModalTitle" class="text-lg font-semibold text-slate-900">Konfirmasi Pembatalan Booking</h3>
@@ -270,7 +268,7 @@
                 <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
                     <div class="flex items-center gap-2">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-900">
-                            <span aria-hidden="true" class="font-semibold">▤</span>
+                            <i data-feather="file-text" class="h-5 w-5" aria-hidden="true"></i>
                         </span>
                         <h2 class="text-base font-semibold text-slate-900">Ringkasan booking</h2>
                     </div>
@@ -340,7 +338,7 @@
                     try {
                         await navigator.clipboard.writeText(value);
                         const original = button.innerHTML;
-                        button.innerHTML = '<span aria-hidden="true" class="font-semibold">✓</span> Tersalin';
+                        button.innerHTML = '<i data-feather="check" class="h-4 w-4" aria-hidden="true"></i> Tersalin';
                         if (window.feather) window.feather.replace();
                         window.setTimeout(() => {
                             button.innerHTML = original;

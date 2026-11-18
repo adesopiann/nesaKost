@@ -16,7 +16,7 @@
 
             {{-- HEADER PROPERTI --}}
             <a href="{{ route('guest.home') }}" class="text-sm text-blue-900 hover:underline">
-                ← Kembali ke pencarian
+                <i data-feather="arrow-left" class="mr-1 inline h-4 w-4"></i> Kembali ke pencarian
             </a>
 
             <div class="mt-8">
@@ -65,14 +65,7 @@
 
                                 <div
                                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-900">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 7h-9" />
-                                        <path d="M14 17H5" />
-                                        <circle cx="17" cy="17" r="3" />
-                                        <circle cx="7" cy="7" r="3" />
-                                    </svg>
+                                    <i data-feather="sliders" class="h-5 w-5"></i>
                                 </div>
 
                                 <div>

@@ -57,8 +57,3 @@ Homestead.yaml
 *.tmp
 
 /package-lock.backup.json
-
-# Internal documentation
-AUDIT_AND_DEVELOPMENT_NOTES.md
-PHASE_3_RENEWAL_NOTES.md
-CLAUDE.md

@@ -26,7 +26,7 @@
                     </p>
 
                     <div class="mt-5 flex items-center gap-2 text-xs text-slate-500">
-                        <span class="text-green-600">✓</span>
+                        <i data-feather="check" class="h-4 w-4 text-green-600"></i>
                         Pencarian berdasarkan radius maksimal 5 km dari kampus pilihan.
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                 </fieldset>
 
                 <button type="submit" class="w-full rounded-lg bg-blue-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-800">
-                    Cari kost di sekitar kampus →
+                    Cari kost di sekitar kampus <i data-feather="arrow-right" class="ml-1 inline h-4 w-4"></i>
                 </button>
             </form>
         </div>
@@ -173,12 +173,12 @@
                     <p class="mt-3 text-sm leading-7 text-slate-500">Tentukan Kampus 1 atau Kampus 2 untuk melihat pilihan kost di sekitar lokasi kampus tujuan.</p>
                 </div>
                 <div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-900">▦</div>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="grid" class="h-5 w-5"></i></div>
                     <h3 class="mt-5 font-semibold text-slate-800">Bandingkan dengan jelas</h3>
                     <p class="mt-3 text-sm leading-7 text-slate-500">Harga, jarak, kategori, dan ketersediaan kamar disajikan agar mudah dipahami.</p>
                 </div>
                 <div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-900">✓</div>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="check-circle" class="h-5 w-5"></i></div>
                     <h3 class="mt-5 font-semibold text-slate-800">Informasi yang transparan</h3>
                     <p class="mt-3 text-sm leading-7 text-slate-500">Detail kost dapat diketahui sebelum kamu melanjutkan proses booking.</p>
                 </div>
@@ -199,7 +199,7 @@
                         </p>
                         @if(\Illuminate\Support\Facades\Route::has('login'))
                             <a href="{{ route('login') }}" class="mt-8 inline-flex rounded-lg bg-white px-5 py-3 text-sm font-semibold text-blue-900 transition hover:bg-blue-50">
-                                Pelajari untuk pemilik kost →
+                                Pelajari untuk pemilik kost <i data-feather="arrow-right" class="ml-1 inline h-4 w-4"></i>
                             </a>
                         @else
                             <span class="mt-8 inline-flex rounded-lg bg-white/15 px-5 py-3 text-sm text-white">Pendaftaran pemilik kost segera hadir</span>

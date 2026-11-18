@@ -53,7 +53,7 @@
                     @endif
                 </form>
                 <a href="{{ route('owner.rooms.index') }}" title="Muat ulang"
-                    class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100">↻</a>
+                    aria-label="Muat ulang" class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100"><i data-feather="refresh-cw" class="h-4 w-4"></i></a>
             </div>
 
             <div class="overflow-x-auto">

@@ -69,12 +69,12 @@
             @else
 
                 {{-- MENU GUEST --}}
-                <a href="{{ route('guest.home') }}#cari"
+                <a href="{{ route('customer.home') }}#cari"
                    class="text-sm font-medium text-slate-600 transition hover:text-blue-900">
                     Cari Kost
                 </a>
 
-                <a href="{{ route('guest.home') }}#pemilik"
+                <a href="{{ route('customer.home') }}#pemilik"
                    class="text-sm font-medium text-slate-600 transition hover:text-blue-900">
                     Untuk Pemilik Kost
                 </a>
@@ -153,7 +153,6 @@
                         {{ $menu['label'] }}
                     </a>
                 @endforeach
-
                 <div class="border-t border-slate-100 pt-4">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -166,12 +165,12 @@
 
             @else
 
-                <a href="{{ route('guest.home') }}#cari"
+                <a href="{{ route('customer.home') }}#cari"
                    class="text-sm font-medium text-slate-600">
                     Cari Kost
                 </a>
 
-                <a href="{{ route('guest.home') }}#pemilik"
+                <a href="{{ route('customer.home') }}#pemilik"
                    class="text-sm font-medium text-slate-600">
                     Untuk Pemilik Kost
                 </a>
@@ -209,7 +208,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         const menuButton = document.getElementById('customer-menu-button');
         const mobileMenu = document.getElementById('customer-mobile-menu');
-
         if (!menuButton || !mobileMenu) return;
 
         menuButton.addEventListener('click', function () {

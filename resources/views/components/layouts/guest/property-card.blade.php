@@ -37,7 +37,7 @@
                         <span class="text-xs font-normal text-slate-500">/ bulan</span>
                     </p>
                 </div>
-                <span class="text-sm font-medium text-blue-900">Lihat detail →</span>
+                <span class="inline-flex items-center gap-1 text-sm font-medium text-blue-900">Lihat detail <i data-feather="arrow-right" class="h-4 w-4"></i></span>
             </div>
         </div>
     </a>
