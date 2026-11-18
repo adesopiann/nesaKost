@@ -300,7 +300,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            @elseif($renewalBooking && $renewalBooking->status === 'pending_payment')
+                            @elseif(
+                                $renewalBooking
+                                && $renewalBooking->status === 'pending_payment'
+                                && !$renewalPaymentDeadlinePassed
+                            )
                                 <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
                                     <div class="flex flex-wrap items-center justify-between gap-2">
                                         <p class="text-sm font-semibold text-amber-950">Perpanjangan menunggu pembayaran</p>
@@ -314,20 +318,63 @@
                                         Lihat Pembayaran
                                     </a>
                                 </div>
-                            @elseif(
-                                $currentRent->status === 'active'
-                                && $currentRent->end_date->isBetween(
-                                    now()->addDays(7)->startOfDay(),
-                                    now()->addDays(30)->endOfDay()
-                                )
-                            )
+                            @elseif($renewalAttemptExpired)
+                                <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                    <div class="flex items-start gap-3">
+                                        <i data-feather="alert-circle" class="mt-0.5 h-5 w-5 shrink-0 text-amber-700"></i>
+                                        <div>
+                                            <p class="text-sm font-semibold text-amber-950">Kesempatan perpanjangan sudah berakhir</p>
+                                            <p class="mt-1 text-sm leading-6 text-amber-800">
+                                                Pengajuan perpanjangan sebelumnya tidak diselesaikan dalam batas waktu pembayaran 72 jam. Kamu tidak dapat mengajukan perpanjangan lagi untuk masa sewa ini. Jika masih ingin tinggal, silakan cari kamar dan lakukan booking baru melalui halaman utama.
+                                            </p>
+                                            <a href="{{ route('guest.home') }}"
+                                               class="mt-3 inline-flex items-center rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">
+                                                Cari Kamar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($renewalWindowOpen)
                                 <div class="mt-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
-                                    <p class="text-sm font-semibold text-blue-950">Masa perpanjangan tersedia</p>
-                                    <p class="mt-1 text-sm text-blue-800">Ajukan perpanjangan mulai H-30 hingga H-7 sebelum masa sewa berakhir.</p>
-                                    <a href="{{ route('tenant.rents.renewal.create', $currentRent->id) }}"
-                                       class="mt-3 inline-flex rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-950">
-                                        Ajukan Perpanjangan
-                                    </a>
+                                    <div class="flex items-start gap-3">
+                                        <i data-feather="calendar" class="mt-0.5 h-5 w-5 shrink-0 text-blue-900"></i>
+                                        <div>
+                                            <p class="text-sm font-semibold text-blue-950">
+                                                @if($daysUntilRentEnd === 7)
+                                                    Hari terakhir untuk mengajukan perpanjangan
+                                                @else
+                                                    Masa perpanjangan tersedia
+                                                @endif
+                                            </p>
+                                            <p class="mt-1 text-sm leading-6 text-blue-800">
+                                                @if($daysUntilRentEnd === 7)
+                                                    Hari ini adalah kesempatan terakhir untuk mengajukan perpanjangan. Ajukan sekarang dan selesaikan pembayaran dalam 72 jam.
+                                                @else
+                                                    Masa sewa kamu berakhir dalam {{ $daysUntilRentEnd }} hari. Kamu dapat mengajukan perpanjangan mulai sekarang hingga H-7.
+                                                @endif
+                                            </p>
+                                            <a href="{{ route('tenant.rents.renewal.create', $currentRent->id) }}"
+                                               class="mt-3 inline-flex items-center rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-950">
+                                                Ajukan Perpanjangan
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($renewalWindowClosed)
+                                <div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                    <div class="flex items-start gap-3">
+                                        <i data-feather="calendar" class="mt-0.5 h-5 w-5 shrink-0 text-slate-600"></i>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Periode perpanjangan telah ditutup</p>
+                                            <p class="mt-1 text-sm leading-6 text-slate-600">
+                                                Batas pengajuan perpanjangan adalah H-7 dan sudah terlewati. Kamu tidak dapat memperpanjang masa sewa ini. Jika masih ingin menyewa, silakan cari kamar dan buat booking baru melalui halaman utama.
+                                            </p>
+                                            <a href="{{ route('guest.home') }}"
+                                               class="mt-3 inline-flex items-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900">
+                                                Cari Kamar
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>

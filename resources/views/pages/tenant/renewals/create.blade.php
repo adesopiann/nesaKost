@@ -22,9 +22,16 @@
 
             @if($existingRenewal)
                 <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
-                    <p class="font-semibold text-amber-900">Pengajuan perpanjangan sudah ada</p>
-                    <p class="mt-1 text-sm text-amber-800">Booking {{ $existingRenewal->booking_code }} berstatus {{ $existingRenewal->status === 'confirmed' ? 'dikonfirmasi' : 'menunggu pembayaran' }}.</p>
-                    <a href="{{ route('tenant.bookings.show', $existingRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                    <p class="font-semibold text-amber-900">Kesempatan renewal sudah digunakan</p>
+                    @if($existingRenewal->status === 'confirmed')
+                        <p class="mt-1 text-sm text-amber-800">Pengajuan perpanjangan sebelumnya sudah berhasil dikonfirmasi.</p>
+                        <a href="{{ route('tenant.bookings.show', $existingRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                    @elseif($existingRenewal->status === 'pending_payment')
+                        <p class="mt-1 text-sm text-amber-800">Kamu masih memiliki pengajuan perpanjangan yang menunggu pembayaran.</p>
+                        <a href="{{ route('tenant.bookings.show', $existingRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                    @else
+                        <p class="mt-1 text-sm text-amber-800">Pengajuan sebelumnya berstatus {{ $existingRenewal->status }}. Kamu tidak dapat mengajukan renewal lagi untuk masa sewa ini. Jika masih ingin menyewa, silakan lakukan booking reguler melalui halaman utama setelah periode sewa saat ini berakhir.</p>
+                    @endif
                 </div>
             @elseif(!$eligibility['eligible'])
                 <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">

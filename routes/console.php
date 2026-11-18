@@ -13,3 +13,9 @@ Artisan::command('inspire', function () {
 Schedule::command('ekost:sync-rental-lifecycle')
     ->everyMinute()
     ->withoutOverlapping();
+
+// Pengingat masa sewa dijalankan terpisah dari sinkronisasi lifecycle.
+// Waktu mengikuti timezone aplikasi (Asia/Jakarta).
+Schedule::command('ekost:send-rent-expiration-reminders')
+    ->dailyAt('09:00')
+    ->withoutOverlapping();

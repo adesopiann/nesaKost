@@ -102,7 +102,11 @@ class RoomAvailabilityService
             ->where('room_id', $room->id)
             ->whereIn('status', self::BLOCKING_RENT_STATUSES)
             ->whereDate('end_date', '<', $toDate->toDateString())
-            ->get(['end_date']);
+            // Begitu tenant pernah mengajukan renewal, hak hold prioritas
+            // tidak dibuat lagi. Pending renewal memblokir lewat booking-nya;
+            // jika expired, periode langsung dilepas.
+            ->whereDoesntHave('renewalBookings')
+            ->get(['id', 'end_date']);
 
         foreach ($priorityRents as $rent) {
             $rentEnd = CarbonImmutable::parse($rent->end_date);
@@ -273,6 +277,9 @@ private function checkRenewalPriority(
         ->whereIn('status', self::BLOCKING_RENT_STATUSES)
         ->when($excludeRentId, fn ($query) => $query->where('id', '!=', $excludeRentId))
         ->whereDate('end_date', '<', $requestedStart->toDateString())
+        // Renewal yang sudah pernah diajukan tidak lagi memakai hold umum.
+        // Booking pending yang belum expired tetap memblokir melalui query booking.
+        ->whereDoesntHave('renewalBookings')
         ->orderBy('end_date')
         ->get();
 

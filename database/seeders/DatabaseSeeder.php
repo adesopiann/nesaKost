@@ -45,7 +45,10 @@ class DatabaseSeeder extends Seeder
                 ['email' => 'tenant07@ekost.test', 'fname' => 'Yoga', 'lname' => 'Prakoso', 'phone' => '081300000007', 'address' => 'Jombang', 'role' => 'tenant'],
                 ['email' => 'tenant08@ekost.test', 'fname' => 'Intan', 'lname' => 'Permata', 'phone' => '081300000008', 'address' => 'Mojokerto', 'role' => 'tenant'],
                 ['email' => 'ade@gmail.com', 'fname' => 'Ade', 'lname' => 'Sopian', 'phone' => '081300000009', 'address' => 'Ketintang', 'role' => 'tenant'],
-                ];
+                ['email' => 'reminder.h30@ekost.test', 'fname' => 'Demo', 'lname' => 'Reminder H30', 'phone' => '081300000010', 'address' => 'Surabaya', 'role' => 'tenant'],
+                ['email' => 'reminder.h7@ekost.test', 'fname' => 'Demo', 'lname' => 'Reminder H7', 'phone' => '081300000011', 'address' => 'Surabaya', 'role' => 'tenant'],
+                ['email' => 'reminder.h@ekost.test', 'fname' => 'Demo', 'lname' => 'Reminder H', 'phone' => '081300000012', 'address' => 'Surabaya', 'role' => 'tenant'],
+            ];
 
             $userIds = [];
             foreach ($userDefinitions as $definition) {
@@ -83,6 +86,7 @@ class DatabaseSeeder extends Seeder
             }
 
             $tenantIds = [];
+            $tenantIdsByEmail = [];
             $tenantProfiles = [
                 ['tenant01@ekost.test', 'Mahasiswa Sistem Informasi', 'Agus Saputra', '082100000001'],
                 ['tenant02@ekost.test', 'Mahasiswa Manajemen', 'Sri Rahmawati', '082100000002'],
@@ -93,10 +97,13 @@ class DatabaseSeeder extends Seeder
                 ['tenant07@ekost.test', 'Mahasiswa Ekonomi', 'Bambang Prakoso', '082100000007'],
                 ['tenant08@ekost.test', 'Mahasiswa Sistem Informasi', 'Sari Permata', '082100000008'],
                 ['ade@gmail.com', 'Mahasiswa Sistem Informasi', 'Ade Sopian', '082100000009'],
+                ['reminder.h30@ekost.test', 'Akun pengujian pengingat H-30', 'Kontak Darurat H30', '082100000010'],
+                ['reminder.h7@ekost.test', 'Akun pengujian pengingat H-7', 'Kontak Darurat H7', '082100000011'],
+                ['reminder.h@ekost.test', 'Akun pengujian pengingat H', 'Kontak Darurat H', '082100000012'],
             ];
 
             foreach ($tenantProfiles as [$email, $profession, $emergencyName, $emergencyNumber]) {
-                $tenantIds[] = DB::table('tenants')->insertGetId([
+                $tenantId = DB::table('tenants')->insertGetId([
                     'user_id' => $userIds[$email],
                     'profession' => $profession,
                     'emergency_name' => $emergencyName,
@@ -104,6 +111,10 @@ class DatabaseSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
+
+                // Simpan berdasarkan indeks untuk data transaksi lama dan email untuk data khusus.
+                $tenantIds[] = $tenantId;
+                $tenantIdsByEmail[$email] = $tenantId;
             }
 
             /*
@@ -463,6 +474,95 @@ class DatabaseSeeder extends Seeder
             DB::table('rent')->where('id', $renewalBaseRentId)->update([
                 'rent_code' => 'RENT-' . $renewalBaseRentId,
             ]);
+
+
+            /*
+             * 8. DATA KHUSUS PENGUJIAN RENT EXPIRATION REMINDERS
+             *
+             * Tiga akun tenant dibuat khusus untuk menguji H-30, H-7, dan H.
+             * Tanggal akhir bersifat dinamis mengikuti tanggal seeder dijalankan.
+             * Password ketiga akun: password123.
+             */
+            $reminderTestDefinitions = [
+                [
+                    'email' => 'reminder.h30@ekost.test',
+                    'room_code' => 'A-104',
+                    'reminder_type' => 'H-30',
+                    'days_until_end' => 30,
+                ],
+                [
+                    'email' => 'reminder.h7@ekost.test',
+                    'room_code' => 'B-204',
+                    'reminder_type' => 'H-7',
+                    'days_until_end' => 7,
+                ],
+                [
+                    'email' => 'reminder.h@ekost.test',
+                    'room_code' => 'C-305',
+                    'reminder_type' => 'H',
+                    'days_until_end' => 0,
+                ],
+            ];
+
+            foreach ($reminderTestDefinitions as $definition) {
+                $tenantId = $tenantIdsByEmail[$definition['email']];
+                $room = $rooms[$definition['room_code']];
+                $endDate = Carbon::today()->addDays($definition['days_until_end']);
+                $startDate = $endDate->copy()->subMonthsNoOverflow(3)->addDay();
+                $createdAt = $startDate->copy()->subDays(14);
+                $paidAt = $createdAt->copy()->addHours(2);
+                $total = $room['price'] * 3;
+
+                $bookingId = DB::table('booking')->insertGetId([
+                    'booking_code' => null,
+                    'tenant_id' => $tenantId,
+                    'room_id' => $room['id'],
+                    'booking_type' => 'new',
+                    'previous_rent_id' => null,
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $endDate->toDateString(),
+                    'duration_month' => 3,
+                    'price_snapshot' => $room['price'],
+                    'status' => 'confirmed',
+                    'expires_at' => null,
+                    'created_at' => $createdAt,
+                    'updated_at' => $paidAt,
+                ]);
+                DB::table('booking')->where('id', $bookingId)->update([
+                    'booking_code' => 'BOOKING-' . $bookingId,
+                ]);
+
+                $paymentId = DB::table('payment')->insertGetId([
+                    'payment_code' => null,
+                    'booking_id' => $bookingId,
+                    'amount' => $total,
+                    'payment_method' => 'bank_transfer',
+                    'status' => 'paid',
+                    'paid_at' => $paidAt,
+                    'expires_at' => null,
+                    'created_at' => $createdAt,
+                    'updated_at' => $paidAt,
+                ]);
+                DB::table('payment')->where('id', $paymentId)->update([
+                    'payment_code' => 'PAY-' . $paymentId,
+                ]);
+
+                $rentId = DB::table('rent')->insertGetId([
+                    'rent_code' => null,
+                    'booking_id' => $bookingId,
+                    'tenant_id' => $tenantId,
+                    'room_id' => $room['id'],
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $endDate->toDateString(),
+                    'status' => 'active',
+                    'total_price' => $total,
+                    'created_at' => $paidAt,
+                    'updated_at' => $paidAt,
+                ]);
+                DB::table('rent')->where('id', $rentId)->update([
+                    'rent_code' => 'TEST-REMINDER-' . $definition['reminder_type'] . '-' . $rentId,
+                ]);
+            }
         });
     }
 }

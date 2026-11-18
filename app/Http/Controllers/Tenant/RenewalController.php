@@ -30,8 +30,10 @@ class RenewalController extends Controller
             ->findOrFail($rentId);
 
         $eligibility = $this->eligibility($rent);
+        // Satu kali percobaan renewal saja untuk setiap rent.
+        // Status expired/failed/cancelled tetap dianggap sebagai percobaan
+        // yang sudah digunakan dan tidak dapat diajukan ulang.
         $existingRenewal = $rent->renewalBookings()
-            ->whereIn('status', ['pending_payment', 'confirmed'])
             ->latest('id')
             ->first();
 
@@ -68,9 +70,10 @@ class RenewalController extends Controller
                     ]);
                 }
 
+                // Renewal hanya boleh diajukan satu kali untuk satu rent,
+                // termasuk jika pengajuan sebelumnya sudah expired/cancelled.
                 $existingRenewal = Booking::query()
                     ->where('previous_rent_id', $rent->id)
-                    ->whereIn('status', ['pending_payment', 'confirmed'])
                     ->lockForUpdate()
                     ->exists();
 

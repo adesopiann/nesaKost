@@ -38,18 +38,22 @@ class BookingController extends Controller
             abort(403, 'Data tenant tidak ditemukan.');
         }
 
-        // Satu tenant hanya boleh memiliki satu rent aktif/scheduled.
-        $hasActiveRent = $tenant->rents()
+        $startDate = CarbonImmutable::parse($validated['start_date'])->startOfDay();
+
+        // Tenant boleh membuat booking reguler untuk periode setelah rent
+        // yang sedang berjalan berakhir. Rent yang masih mencakup tanggal
+        // mulai booking baru tetap mencegah booking tersebut.
+        $hasOverlappingRent = $tenant->rents()
             ->whereIn('status', ['scheduled', 'active'])
+            ->whereDate('start_date', '<=', $startDate->toDateString())
+            ->whereDate('end_date', '>=', $startDate->toDateString())
             ->exists();
 
-        if ($hasActiveRent) {
+        if ($hasOverlappingRent) {
             throw ValidationException::withMessages([
-                'room_id' => 'Kamu masih memiliki masa sewa yang aktif. Selesaikan masa sewa tersebut sebelum melakukan booking baru.',
+                'room_id' => 'Kamu masih memiliki masa sewa yang mencakup tanggal mulai booking. Pilih tanggal setelah masa sewa tersebut berakhir.',
             ]);
         }
-
-        $startDate = CarbonImmutable::parse($validated['start_date']);
 
         $durationMonth = (int) $validated['duration_month'];
 
