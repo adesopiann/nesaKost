@@ -23,6 +23,8 @@ class Booking extends Model
         'price_snapshot',
         'status',
         'expires_at',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected function casts(): array
@@ -31,6 +33,7 @@ class Booking extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'expires_at' => 'datetime',
+            'cancelled_at' => 'datetime',
             'price_snapshot' => 'decimal:2',
         ];
     }

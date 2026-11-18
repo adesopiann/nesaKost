@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rent extends Model
 {
@@ -44,7 +45,7 @@ class Rent extends Model
         return $this->belongsTo(Room::class);
     }
 
-        /**
+    /**
      * Booking renewal yang diajukan berdasarkan rent ini.
      */
     public function renewalBookings(): HasMany

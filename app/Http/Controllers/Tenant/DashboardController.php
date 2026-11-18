@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -40,6 +41,24 @@ class DashboardController extends Controller
         // Prioritaskan penyewaan aktif untuk ditampilkan.
         $currentRent = $activeRent ?? $scheduledRent;
 
+        // Mengambil pengajuan renewal yang berkaitan dengan rent yang sedang
+        // ditampilkan. Relasi ini dipakai untuk menampilkan status dan detail
+        // rent baru setelah pembayaran renewal berhasil.
+        $renewalBooking = null;
+
+        if ($currentRent) {
+            $renewalBooking = Booking::query()
+                ->where('tenant_id', $tenant->id)
+                ->where('booking_type', 'renewal')
+                ->where(function ($query) use ($currentRent) {
+                    $query->where('previous_rent_id', $currentRent->id)
+                        ->orWhere('id', $currentRent->booking_id);
+                })
+                ->with(['rent', 'payments'])
+                ->latest('id')
+                ->first();
+        }
+
         // Menghitung seluruh pembayaran berhasil milik tenant.
         $paidTotal = Payment::whereHas('booking', function ($query) use ($tenant) {
                 $query->where('tenant_id', $tenant->id);
@@ -65,6 +84,7 @@ class DashboardController extends Controller
             'activeRent',
             'scheduledRent',
             'currentRent',
+            'renewalBooking',
             'paidTotal',
             'recentPayments'
         ));

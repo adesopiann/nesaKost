@@ -127,6 +127,82 @@ class BookingController extends Controller
             ->with('success', 'Booking berhasil dibuat. Silakan lanjutkan pembayaran.');
     }
 
+    public function cancel(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'cancellation_reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $tenant = $request->user()->tenant;
+        abort_if(!$tenant, 403);
+
+        $result = DB::transaction(function () use ($tenant, $id, $validated) {
+            $booking = Booking::query()
+                ->where('tenant_id', $tenant->id)
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            // Booking yang sudah dibayar tidak boleh dibatalkan tenant.
+            $payments = $booking->payments()
+                ->lockForUpdate()
+                ->get();
+
+            if (
+                $booking->status === 'confirmed' ||
+                $payments->contains(fn ($payment) => $payment->status === 'paid')
+            ) {
+                return 'already_paid';
+            }
+
+            if ($booking->status !== 'pending_payment') {
+                return $booking->status === 'expired' ? 'expired' : 'not_cancellable';
+            }
+
+            // Jika batas waktu sudah lewat, pertahankan status expired,
+            // bukan mengubahnya menjadi cancelled.
+            if ($booking->expires_at && $booking->expires_at->isPast()) {
+                $booking->update(['status' => 'expired']);
+
+                $booking->payments()
+                    ->where('status', 'pending')
+                    ->update(['status' => 'expired']);
+
+                return 'expired';
+            }
+
+            $booking->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancellation_reason' => $validated['cancellation_reason'] ?? null,
+            ]);
+
+            // Hanya payment yang masih pending yang dibatalkan.
+            $booking->payments()
+                ->where('status', 'pending')
+                ->update(['status' => 'cancelled']);
+
+            return 'cancelled';
+        });
+
+        return match ($result) {
+            'cancelled' => redirect()
+                ->route('tenant.bookings.show', $id)
+                ->with('success', 'Booking berhasil dibatalkan. Kamar sekarang tersedia kembali.'),
+
+            'already_paid' => redirect()
+                ->route('tenant.bookings.show', $id)
+                ->with('error', 'Booking yang sudah dibayar tidak dapat dibatalkan.'),
+
+            'expired' => redirect()
+                ->route('tenant.bookings.show', $id)
+                ->with('error', 'Masa pembayaran telah berakhir. Booking berstatus kedaluwarsa.'),
+
+            default => redirect()
+                ->route('tenant.bookings.show', $id)
+                ->with('error', 'Booking ini tidak dapat dibatalkan.'),
+        };
+    }
+
     public function show(Request $request, int $id)
     {
         $tenant = $request->user()->tenant;

@@ -37,6 +37,7 @@
                             'confirmed' => 'Dikonfirmasi',
                             'expired' => 'Kedaluwarsa',
                             'cancelled' => 'Dibatalkan',
+                            'cancelled' => 'Dibatalkan',
                         ][$booking->status] ?? $booking->status;
 
                     $paymentStatus =
@@ -45,6 +46,7 @@
                             'paid' => 'Berhasil',
                             'failed' => 'Gagal',
                             'expired' => 'Kedaluwarsa',
+                            'cancelled' => 'Dibatalkan',
                         ][$latestPayment?->status] ?? 'Belum ada pembayaran';
                 @endphp
 
@@ -74,6 +76,13 @@
                         <span class="text-sm text-slate-500">Kode Booking</span>
                         <span class="text-sm font-semibold text-slate-800">
                             {{ $booking->booking_code }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between gap-4">
+                        <span class="text-sm text-slate-500">Jenis Booking</span>
+                        <span class="text-sm font-semibold text-slate-800">
+                            {{ $booking->booking_type === 'renewal' ? 'Perpanjangan Sewa' : 'Booking Baru' }}
                         </span>
                     </div>
 
@@ -125,63 +134,48 @@
 
                 </div>
 
-                {{-- SIMULASI PEMBAYARAN --}}
-                @if ($booking->status === 'pending_payment' && $latestPayment?->status === 'pending')
-                    <div class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                {{-- AKSI BOOKING --}}
+                @if ($booking->status === 'pending_payment')
+                    @if ($booking->booking_type === 'renewal')
+                        <div class="mt-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                            <p class="text-sm font-semibold text-blue-950">Batas pembayaran perpanjangan</p>
+                            <p class="mt-1 text-sm text-blue-900">Selesaikan pembayaran paling lambat {{ $booking->expires_at?->format('d M Y, H:i') ?? '-' }} WIB. Kamar ditahan selama periode ini.</p>
+                        </div>
+                    @endif
+                    <div class="mt-8 space-y-3">
+                        <a href="{{ route('tenant.bookings.payments.create', $booking->id) }}"
+                            class="block w-full rounded-lg bg-blue-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-950">
+                            {{ $latestPayment && $latestPayment->status === 'pending' && $latestPayment->payment_method
+                                ? 'Lihat / Ubah Metode Pembayaran'
+                                : 'Pilih Metode Pembayaran' }}
+                        </a>
+                    </div>
 
-                        <h2 class="font-semibold text-amber-900">
-                            Selesaikan Pembayaran
+                    {{-- STATUS PEMBATALAN BOOKING --}}
+                @elseif ($booking->status === 'cancelled')
+                    <div class="mt-8 rounded-xl border border-red-200 bg-red-50 p-5">
+                        <h2 class="font-semibold text-red-900">
+                            Booking Dibatalkan
                         </h2>
 
-                        <p class="mt-2 text-sm text-amber-800">
-                            Batas pembayaran:
-                            {{ $booking->expires_at?->format('d M Y H:i') ?? '-' }}
+                        <p class="mt-2 text-sm text-red-800">
+                            Booking ini telah dibatalkan dan kamar sudah dilepaskan.
                         </p>
 
-                        <p class="mt-3 text-xs leading-relaxed text-amber-700">
-                            Ini merupakan simulasi pembayaran untuk keperluan pengembangan aplikasi.
-                            Tidak ada transaksi uang sungguhan.
-                        </p>
+                        @if ($booking->cancelled_at)
+                            <p class="mt-2 text-xs text-red-700">
+                                Dibatalkan pada {{ $booking->cancelled_at->format('d M Y H:i') }}
+                            </p>
+                        @endif
 
-                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-
-                            {{-- Simulasi berhasil --}}
-                            <form
-                                action="{{ route('tenant.bookings.payments.simulate', [
-                                    'bookingId' => $booking->id,
-                                    'paymentId' => $latestPayment->id,
-                                ]) }}"
-                                method="POST">
-                                @csrf
-
-                                <input type="hidden" name="outcome" value="success">
-
-                                <button type="submit"
-                                    class="w-full rounded-lg bg-green-700 px-4 py-3 text-sm font-semibold text-white hover:bg-green-800">
-                                    Simulasikan Berhasil
-                                </button>
-                            </form>
-
-                            {{-- Simulasi gagal --}}
-                            <form
-                                action="{{ route('tenant.bookings.payments.simulate', [
-                                    'bookingId' => $booking->id,
-                                    'paymentId' => $latestPayment->id,
-                                ]) }}"
-                                method="POST">
-                                @csrf
-
-                                <input type="hidden" name="outcome" value="failed">
-
-                                <button type="submit"
-                                    class="w-full rounded-lg border border-red-300 bg-white px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
-                                    Simulasikan Gagal
-                                </button>
-                            </form>
-
-                        </div>
+                        @if ($booking->cancellation_reason)
+                            <p class="mt-3 text-sm text-red-800">
+                                <strong>Alasan:</strong> {{ $booking->cancellation_reason }}
+                            </p>
+                        @endif
                     </div>
                 @endif
+
 
                 {{-- RENT YANG TERBENTUK --}}
                 @if ($booking->status === 'confirmed' && $booking->rent)
@@ -207,13 +201,6 @@
                         </div>
                     </div>
                 @endif
-
-                <div class="mt-8">
-                    <a href="{{ route('guest.home') }}"
-                        class="block rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                        Kembali ke Beranda
-                    </a>
-                </div>
 
             </div>
         </div>

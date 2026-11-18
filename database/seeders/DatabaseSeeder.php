@@ -44,7 +44,8 @@ class DatabaseSeeder extends Seeder
                 ['email' => 'tenant06@ekost.test', 'fname' => 'Dewi', 'lname' => 'Anggraini', 'phone' => '081300000006', 'address' => 'Madiun', 'role' => 'tenant'],
                 ['email' => 'tenant07@ekost.test', 'fname' => 'Yoga', 'lname' => 'Prakoso', 'phone' => '081300000007', 'address' => 'Jombang', 'role' => 'tenant'],
                 ['email' => 'tenant08@ekost.test', 'fname' => 'Intan', 'lname' => 'Permata', 'phone' => '081300000008', 'address' => 'Mojokerto', 'role' => 'tenant'],
-            ];
+                ['email' => 'ade@gmail.com', 'fname' => 'Ade', 'lname' => 'Sopian', 'phone' => '081300000009', 'address' => 'Ketintang', 'role' => 'tenant'],
+                ];
 
             $userIds = [];
             foreach ($userDefinitions as $definition) {
@@ -91,6 +92,7 @@ class DatabaseSeeder extends Seeder
                 ['tenant06@ekost.test', 'Mahasiswa Psikologi', 'Wati Anggraini', '082100000006'],
                 ['tenant07@ekost.test', 'Mahasiswa Ekonomi', 'Bambang Prakoso', '082100000007'],
                 ['tenant08@ekost.test', 'Mahasiswa Sistem Informasi', 'Sari Permata', '082100000008'],
+                ['ade@gmail.com', 'Mahasiswa Sistem Informasi', 'Ade Sopian', '082100000009'],
             ];
 
             foreach ($tenantProfiles as [$email, $profession, $emergencyName, $emergencyNumber]) {
@@ -387,56 +389,80 @@ class DatabaseSeeder extends Seeder
             }
 
             /*
-             * 7. CONTOH BOOKING RENEWAL
-             * Menghubungkan booking_type=renewal ke rent sebelumnya.
-             * Booking renewal ini masih menunggu pembayaran, sehingga belum
-             * membuat rent baru.
+             * 7. DATA KHUSUS PENGUJIAN RENT RENEWAL
+             *
+             * Tenant demo: ade@gmail.com (tenant index 8)
+             * Masa sewa dibuat berakhir 14 hari dari tanggal seeder dijalankan.
+             * Dengan demikian, tenant berada di dalam jendela pengajuan H-30
+             * sampai H-7 dan dapat langsung mencoba fitur renewal.
+             *
+             * Sengaja TIDAK dibuatkan booking renewal pending di seeder ini.
+             * Tenant harus mengajukan renewal sendiri melalui aplikasi agar
+             * alur pengajuan, penahanan kamar, dan pembayaran 72 jam dapat diuji.
              */
-            $renewalBase = collect($createdRents)->first(function ($rent) {
-                return $rent['end_date']->gt(Carbon::now()->addDays(10));
-            });
+            $renewalTenantIndex = 8;
+            $renewalRoomCode = 'C-304';
+            $renewalRoom = $rooms[$renewalRoomCode];
 
-            if ($renewalBase) {
-                $room = $rooms[$renewalBase['room_code']];
-                $renewalStart = $renewalBase['end_date']->copy();
-                $renewalDuration = 3;
-                $renewalEnd = $renewalStart->copy()->addMonths($renewalDuration);
-                $renewalCreatedAt = Carbon::now()->subMinutes(5);
+            // Masa sewa lama berakhir 14 hari dari hari ini (masih dalam H-30 s.d. H-7).
+            $renewalRentEnd = Carbon::today()->addDays(14);
+            $renewalRentStart = $renewalRentEnd->copy()
+                ->subMonthsNoOverflow(3)
+                ->addDay();
 
-                $renewalBookingId = DB::table('booking')->insertGetId([
-                    'booking_code' => null,
-                    'tenant_id' => $tenantIds[$renewalBase['tenant_index']],
-                    'room_id' => $room['id'],
-                    'booking_type' => 'renewal',
-                    'previous_rent_id' => $renewalBase['id'],
-                    'start_date' => $renewalStart->toDateString(),
-                    'end_date' => $renewalEnd->toDateString(),
-                    'duration_month' => $renewalDuration,
-                    'price_snapshot' => $room['price'],
-                    'status' => 'pending_payment',
-                    'expires_at' => Carbon::now()->addMinutes(25),
-                    'created_at' => $renewalCreatedAt,
-                    'updated_at' => $renewalCreatedAt,
-                ]);
-                DB::table('booking')->where('id', $renewalBookingId)->update([
-                    'booking_code' => 'BOOKING-' . $renewalBookingId,
-                ]);
+            $renewalBookingCreatedAt = $renewalRentStart->copy()->subDays(14);
+            $renewalPaidAt = $renewalBookingCreatedAt->copy()->addMinutes(10);
+            $renewalRentTotal = $renewalRoom['price'] * 3;
 
-                $renewalPaymentId = DB::table('payment')->insertGetId([
-                    'payment_code' => null,
-                    'booking_id' => $renewalBookingId,
-                    'amount' => $room['price'] * $renewalDuration,
-                    'payment_method' => 'bank_transfer',
-                    'status' => 'pending',
-                    'paid_at' => null,
-                    'expires_at' => Carbon::now()->addMinutes(25),
-                    'created_at' => $renewalCreatedAt,
-                    'updated_at' => $renewalCreatedAt,
-                ]);
-                DB::table('payment')->where('id', $renewalPaymentId)->update([
-                    'payment_code' => 'PAY-' . $renewalPaymentId,
-                ]);
-            }
+            $renewalBaseBookingId = DB::table('booking')->insertGetId([
+                'booking_code' => null,
+                'tenant_id' => $tenantIds[$renewalTenantIndex],
+                'room_id' => $renewalRoom['id'],
+                'booking_type' => 'new',
+                'previous_rent_id' => null,
+                'start_date' => $renewalRentStart->toDateString(),
+                'end_date' => $renewalRentEnd->toDateString(),
+                'duration_month' => 3,
+                'price_snapshot' => $renewalRoom['price'],
+                'status' => 'confirmed',
+                'expires_at' => null,
+                'created_at' => $renewalBookingCreatedAt,
+                'updated_at' => $renewalPaidAt,
+            ]);
+            DB::table('booking')->where('id', $renewalBaseBookingId)->update([
+                'booking_code' => 'BOOKING-' . $renewalBaseBookingId,
+            ]);
+
+            $renewalBasePaymentId = DB::table('payment')->insertGetId([
+                'payment_code' => null,
+                'booking_id' => $renewalBaseBookingId,
+                'amount' => $renewalRentTotal,
+                'payment_method' => 'bank_transfer',
+                'status' => 'paid',
+                'paid_at' => $renewalPaidAt,
+                'expires_at' => null,
+                'created_at' => $renewalBookingCreatedAt,
+                'updated_at' => $renewalPaidAt,
+            ]);
+            DB::table('payment')->where('id', $renewalBasePaymentId)->update([
+                'payment_code' => 'PAY-' . $renewalBasePaymentId,
+            ]);
+
+            $renewalBaseRentId = DB::table('rent')->insertGetId([
+                'rent_code' => null,
+                'booking_id' => $renewalBaseBookingId,
+                'tenant_id' => $tenantIds[$renewalTenantIndex],
+                'room_id' => $renewalRoom['id'],
+                'start_date' => $renewalRentStart->toDateString(),
+                'end_date' => $renewalRentEnd->toDateString(),
+                'status' => 'active',
+                'total_price' => $renewalRentTotal,
+                'created_at' => $renewalPaidAt,
+                'updated_at' => $renewalPaidAt,
+            ]);
+            DB::table('rent')->where('id', $renewalBaseRentId)->update([
+                'rent_code' => 'RENT-' . $renewalBaseRentId,
+            ]);
         });
     }
 }

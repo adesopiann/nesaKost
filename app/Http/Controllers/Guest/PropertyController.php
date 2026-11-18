@@ -4,12 +4,40 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\BranchDorm;
+use App\Models\Room;
 use App\Services\RoomAvailabilityService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
 class PropertyController extends Controller
 {
+
+    /**
+     * Data rentang tanggal tidak tersedia untuk kalender booking.
+     */
+    public function availability(
+        Request $request,
+        int $roomId,
+        RoomAvailabilityService $availabilityService
+    ) {
+        $validated = $request->validate([
+            'from' => ['required', 'date'],
+            'to' => ['required', 'date', 'after_or_equal:from'],
+        ]);
+
+        $room = Room::query()
+            ->where('status', config('ekost.room_active_status', 'active'))
+            ->findOrFail($roomId);
+
+        return response()->json(
+            $availabilityService->getUnavailableRanges(
+                $room,
+                $validated['from'],
+                $validated['to']
+            )
+        );
+    }
+
     public function show(
         Request $request,
         int $id,

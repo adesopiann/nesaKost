@@ -13,6 +13,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Tenant\DashboardController as TenantDashboardController;
 use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\PaymentController;
+use App\Http\Controllers\Tenant\RenewalController;
 
 Route::get('/', [HomeController::class, 'index'])
     ->name('guest.home');
@@ -20,6 +21,10 @@ Route::get('/', [HomeController::class, 'index'])
 Route::get('/kost/{id}', [PropertyController::class, 'show'])
     ->whereNumber('id')
     ->name('guest.properties.show');
+
+Route::get('/rooms/{roomId}/availability', [PropertyController::class, 'availability'])
+    ->whereNumber('roomId')
+    ->name('guest.rooms.availability');
 
 
 Route::middleware('guest')->group(function () {
@@ -89,9 +94,43 @@ Route::middleware('auth')->group(function () {
             Route::post('/bookings', [BookingController::class, 'store'])
                 ->name('bookings.store');
 
+            Route::get('/rents/{rentId}/renewal', [RenewalController::class, 'create'])
+                ->whereNumber('rentId')
+                ->name('rents.renewal.create');
+
+            Route::post('/rents/{rentId}/renewal', [RenewalController::class, 'store'])
+                ->whereNumber('rentId')
+                ->name('rents.renewal.store');
+
             Route::get('/bookings/{id}', [BookingController::class, 'show'])
                 ->whereNumber('id')
                 ->name('bookings.show');
+
+            Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])
+                ->whereNumber('id')
+                ->name('bookings.cancel');
+
+            Route::get(
+                    '/bookings/{bookingId}/payments',
+                    [PaymentController::class, 'create']
+                )
+                    ->whereNumber('bookingId')
+                    ->name('bookings.payments.create');
+
+            Route::post(
+                    '/bookings/{bookingId}/payments/method',
+                    [PaymentController::class, 'selectMethod']
+                )
+                    ->whereNumber('bookingId')
+                    ->name('bookings.payments.method');
+
+            Route::get(
+                    '/bookings/{bookingId}/payments/{paymentId}',
+                    [PaymentController::class, 'show']
+                )
+                    ->whereNumber('bookingId')
+                    ->whereNumber('paymentId')
+                    ->name('bookings.payments.show');
 
             Route::post(
                     '/bookings/{bookingId}/payments/{paymentId}/simulate',

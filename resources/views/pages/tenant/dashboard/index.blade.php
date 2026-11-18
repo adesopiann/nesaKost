@@ -202,6 +202,134 @@
                                 </div>
 
                             </div>
+
+                            @php
+                                $renewalRent = $renewalBooking?->rent;
+                                $renewalPayment = $renewalBooking?->payments
+                                    ?->where('status', 'paid')
+                                    ->sortByDesc('paid_at')
+                                    ->first();
+                                $renewalPaid = $renewalBooking
+                                    && $renewalBooking->status === 'confirmed'
+                                    && $renewalPayment
+                                    && $renewalRent;
+                            @endphp
+
+                            @if($renewalPaid)
+                                <div class="mt-6 rounded-lg border border-blue-200 p-5">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <p class="text-sm font-semibold text-green-950">
+                                            Perpanjangan berhasil!
+                                        </p>
+                                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                            Berhasil
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-2 text-sm">
+                                        Pembayaran perpanjangan telah berhasil dan masa sewa baru kamu sudah tercatat.
+                                    </p>
+
+                                    <div class="mt-4 border-t border-blue-200 pt-4">
+                                        <p class="mb-3 text-sm font-semibold text-slate-900">
+                                            Informasi Penyewaan Baru
+                                        </p>
+
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <p class="text-xs text-slate-500">Kode Rent Baru</p>
+                                                <p class="mt-1 text-sm font-semibold text-slate-900">
+                                                    {{ $renewalRent->rent_code ?? '-' }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Status Rent</p>
+                                                @if($renewalRent->status === 'active')
+                                                    <span class="mt-1 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                        Aktif
+                                                    </span>
+                                                @else
+                                                    <span class="mt-1 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                                                        Terjadwal
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Tanggal Mulai</p>
+                                                <p class="mt-1 text-sm font-medium text-slate-800">
+                                                    {{ $renewalRent->start_date->format('d M Y') }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Tanggal Berakhir</p>
+                                                <p class="mt-1 text-sm font-medium text-slate-800">
+                                                    {{ $renewalRent->end_date->format('d M Y') }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Durasi Perpanjangan</p>
+                                                <p class="mt-1 text-sm font-medium text-slate-800">
+                                                    {{ $renewalBooking->duration_month }} bulan
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Total Pembayaran</p>
+                                                <p class="mt-1 text-sm font-semibold text-blue-900">
+                                                    Rp{{ number_format((float) $renewalPayment->amount, 0, ',', '.') }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Kode Booking</p>
+                                                <p class="mt-1 text-sm font-medium text-slate-800">
+                                                    {{ $renewalBooking->booking_code ?? '-' }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500">Tanggal Pembayaran</p>
+                                                <p class="mt-1 text-sm font-medium text-slate-800">
+                                                    {{ $renewalPayment->paid_at?->format('d M Y, H:i') ?? '-' }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-blue-200 pt-3">
+                                            <span class="text-sm text-blue-900">Status Pembayaran</span>
+                                            <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                Lunas
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($renewalBooking && $renewalBooking->status === 'pending_payment')
+                                <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <p class="text-sm font-semibold text-amber-950">Perpanjangan menunggu pembayaran</p>
+                                        <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Menunggu</span>
+                                    </div>
+                                    <p class="mt-1 text-sm text-amber-800">
+                                        Selesaikan pembayaran sebelum {{ $renewalBooking->expires_at?->format('d M Y, H:i') ?? '-' }} agar kamar tetap dialokasikan untukmu.
+                                    </p>
+                                    <a href="{{ route('tenant.bookings.show', $renewalBooking->id) }}"
+                                       class="mt-3 inline-flex rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">
+                                        Lihat Pembayaran
+                                    </a>
+                                </div>
+                            @elseif(
+                                $currentRent->status === 'active'
+                                && $currentRent->end_date->isBetween(
+                                    now()->addDays(7)->startOfDay(),
+                                    now()->addDays(30)->endOfDay()
+                                )
+                            )
+                                <div class="mt-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                                    <p class="text-sm font-semibold text-blue-950">Masa perpanjangan tersedia</p>
+                                    <p class="mt-1 text-sm text-blue-800">Ajukan perpanjangan mulai H-30 hingga H-7 sebelum masa sewa berakhir.</p>
+                                    <a href="{{ route('tenant.rents.renewal.create', $currentRent->id) }}"
+                                       class="mt-3 inline-flex rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-950">
+                                        Ajukan Perpanjangan
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -221,7 +349,7 @@
                             Temukan kost yang sesuai dengan kebutuhanmu.
                         </p>
 
-                        <a href="{{ route('customer.home') }}"
+                        <a href="{{ route('guest.home') }}"
                            class="mt-5 inline-flex rounded-lg bg-blue-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800">
                             Cari Kost
                         </a>
