@@ -19,3 +19,8 @@ Schedule::command('ekost:sync-rental-lifecycle')
 Schedule::command('ekost:send-rent-expiration-reminders')
     ->dailyAt('09:00')
     ->withoutOverlapping();
+
+// Retry email pengingat yang gagal, dengan jeda retry minimal 5 menit.
+Schedule::command('ekost:retry-rent-expiration-emails')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();

@@ -52,4 +52,13 @@ class Rent extends Model
     {
         return $this->hasMany(Booking::class, 'previous_rent_id');
     }
+
+    /**
+     * Riwayat status pengiriman email pengingat masa sewa.
+     */
+    public function expirationReminderEmails(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RentExpirationReminderEmail::class, 'rent_id');
+    }
+
 }
