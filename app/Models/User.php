@@ -46,4 +46,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(Tenant::class, 'user_id');
     }
+
+    /**
+     * OTP verifikasi email yang sedang berlaku untuk pengguna.
+     */
+    public function emailVerificationOtp(): HasOne
+    {
+        return $this->hasOne(EmailVerificationOtp::class);
+    }
 }

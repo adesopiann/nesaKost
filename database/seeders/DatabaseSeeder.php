@@ -54,6 +54,8 @@ class DatabaseSeeder extends Seeder
             foreach ($userDefinitions as $definition) {
                 $userIds[$definition['email']] = DB::table('users')->insertGetId([
                     'email' => $definition['email'],
+                    // Akun demo dianggap sudah terverifikasi agar tetap dapat digunakan.
+                    'email_verified_at' => $now,
                     'fname' => $definition['fname'],
                     'lname' => $definition['lname'],
                     'phone_number' => $definition['phone'],

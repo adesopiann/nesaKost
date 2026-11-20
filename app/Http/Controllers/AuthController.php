@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Services\EmailVerificationService;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -22,7 +26,7 @@ class AuthController extends Controller
         return view('pages.auth.register', compact('role'));
     }
 
-    public function register(Request $request)
+    public function register(Request $request, EmailVerificationService $verificationService)
     {
         $role = $request->input('role');
 
@@ -57,7 +61,7 @@ class AuthController extends Controller
             'password.min' => 'Password minimal 8 karakter.',
         ]);
 
-        DB::transaction(function () use ($data, $role) {
+        $userId = DB::transaction(function () use ($data, $role) {
             $now = now();
 
             $userId = DB::table('users')->insertGetId([
@@ -90,10 +94,19 @@ class AuthController extends Controller
                     'updated_at' => $now,
                 ]);
             }
+
+            return $userId;
         });
 
-        return redirect()->route('login')
-            ->with('success', 'Pendaftaran berhasil. Silakan login.');
+        $user = User::query()->findOrFail($userId);
+        $request->session()->put('pending_email_verification_user_id', $user->id);
+        try {
+            $verificationService->send($user);
+        } catch (Throwable $exception) {
+            Log::error('Gagal mengirim OTP setelah registrasi.', ['user_id' => $user->id, 'exception' => $exception->getMessage()]);
+            return redirect()->route('email.verification.show')->withErrors(['otp' => 'Akun berhasil dibuat, tetapi email OTP belum terkirim. Periksa konfigurasi email, lalu gunakan tombol kirim ulang.']);
+        }
+        return redirect()->route('email.verification.show')->with('success', 'Pendaftaran berhasil. Kami telah mengirim kode verifikasi ke email kamu.');
     }
 
     public function showLogin()
@@ -108,10 +121,21 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        if (! Auth::validate($credentials)) {
+            throw ValidationException::withMessages(['email' => 'Email atau password yang kamu masukkan salah.']);
+        }
+
+        $user = User::query()->where('email', $credentials['email'])->first();
+        if ($user === null) {
+            throw ValidationException::withMessages(['email' => 'Email atau password yang kamu masukkan salah.']);
+        }
+        if ($user->email_verified_at === null) {
+            $request->session()->put('pending_email_verification_user_id', $user->id);
+            return redirect()->route('email.verification.show')->withErrors(['email' => 'Email kamu belum terverifikasi. Verifikasi terlebih dahulu sebelum login.']);
+        }
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            throw ValidationException::withMessages([
-                'email' => 'Email atau password yang kamu masukkan salah.',
-            ]);
+            throw ValidationException::withMessages(['email' => 'Email atau password yang kamu masukkan salah.']);
         }
 
         $request->session()->regenerate();

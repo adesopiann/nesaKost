@@ -9,6 +9,7 @@ use App\Http\Controllers\Guest\HomeController;
 use App\Http\Controllers\Guest\PropertyController;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 
 use App\Http\Controllers\Tenant\DashboardController as TenantDashboardController;
 use App\Http\Controllers\Tenant\BookingController;
@@ -38,6 +39,13 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register'])
         ->name('register.store');
+
+    Route::get('/email/verify', [EmailVerificationController::class, 'show'])->name('email.verification.show');
+    Route::post('/email/verify', [EmailVerificationController::class, 'verify'])->middleware('throttle:5,1')->name('email.verification.verify');
+    // Cooldown 60 detik ditangani oleh EmailVerificationService.
+    // Throttle tetap dipertahankan sebagai lapisan proteksi tambahan, dengan batas
+    // lebih longgar agar pengguna menerima pesan cooldown yang ramah terlebih dahulu.
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])->middleware('throttle:5,1')->name('email.verification.send');
 
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
