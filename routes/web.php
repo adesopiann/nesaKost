@@ -24,6 +24,9 @@ use App\Http\Controllers\Tenant\ProfileController;
 Route::get('/', [HomeController::class, 'index'])
     ->name('guest.home');
 
+Route::view('/untuk-pemilik', 'pages.guest.owner')
+    ->name('guest.owner');
+
 Route::get('/kost/{id}', [PropertyController::class, 'show'])
     ->whereNumber('id')
     ->name('guest.properties.show');

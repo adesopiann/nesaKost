@@ -143,7 +143,7 @@ class AuthController extends Controller
         $destination = match ($request->user()->role) {
             'owner' => '/owner/dashboard',
             'manager' => '/manager/dashboard',
-            'tenant' => '/',
+            'tenant' => '/tenant/dashboard',
             default => null,
         };
 

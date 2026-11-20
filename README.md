@@ -1,32 +1,30 @@
-# eKost — Riwayat Pembayaran (tabel konsisten)
+# nesaKost - Halaman Untuk Pemilik Kost
 
-Patch ini menyelaraskan daftar transaksi pembayaran pada Dashboard dan Riwayat Pembayaran menggunakan satu partial Blade yang sama.
+Patch dibuat berdasarkan source project terbaru yang diunggah.
 
-## File dalam patch
+## File yang ditambahkan
+- `resources/views/pages/guest/owner.blade.php`
 
-- `app/Http/Controllers/Tenant/PaymentHistoryController.php`
-- `resources/views/components/tenant/payment-table.blade.php` — partial tabel bersama
-- `resources/views/pages/tenant/dashboard/index.blade.php` — Dashboard menggunakan partial tabel
-- `resources/views/pages/tenant/riwayat-pembayaran/index.blade.php` — Riwayat Pembayaran menggunakan partial tabel
-- `resources/views/pages/tenant/riwayat-pembayaran/show.blade.php`
-- `routes/tenant-payment-history-snippet.txt` — potongan route untuk ditambahkan jika belum ada
+## File yang diperbarui
+- `routes/web.php` — menambahkan route GET `/untuk-pemilik` bernama `guest.owner`.
+- `resources/views/components/layouts/guest/navbar.blade.php` — tautan Untuk Pemilik Kost desktop dan mobile diarahkan ke halaman baru.
+- `resources/views/components/layouts/guest/footer.blade.php` — tautan Untuk Pemilik diarahkan ke halaman baru.
+- `resources/views/pages/guest/index.blade.php` — CTA pada section pemilik kost diarahkan ke halaman detail baru.
 
-## Cara menerapkan
+## Isi halaman baru
+1. Hero dengan CTA registrasi pemilik dan ilustrasi dashboard.
+2. Ringkasan manfaat utama.
+3. Enam fitur pengelolaan.
+4. Empat langkah mulai bergabung.
+5. FAQ.
+6. CTA akhir menuju registrasi pemilik.
 
-1. Ekstrak folder `nesaKost2` dari ZIP.
-2. Salin file/folder di dalamnya ke root project Laravel, dengan mempertahankan struktur folder.
-3. Pastikan import dan dua route pada `routes/tenant-payment-history-snippet.txt` sudah ditambahkan ke `routes/web.php` di dalam grup route tenant. Jangan menambahkan duplikat jika route sudah ada.
-4. Jalankan:
-   - `php artisan view:clear`
-   - `php artisan route:list --name=tenant.riwayat-pembayaran`
-5. Buka Dashboard dan Riwayat Pembayaran untuk memeriksa kedua tabel.
+## Penerapan
+Ekstrak ZIP ke root project Laravel dan izinkan file yang sama ditimpa.
+Kemudian jalankan:
 
-## Perubahan UI
+```bash
+php artisan optimize:clear
+```
 
-- Kedua halaman memakai kolom dan gaya tabel yang sama: Kode Pembayaran, Tanggal, Metode, Jumlah, Status, dan Aksi.
-- Aksi Detail membuka halaman detail pembayaran.
-- Dashboard tetap membatasi daftar menjadi lima transaksi terbaru.
-- Riwayat Pembayaran tetap mempertahankan filter, ringkasan, dan pagination.
-- Tabel dapat digulir horizontal pada layar sempit.
-
-Patch ini tidak mengubah skema database maupun alur pembayaran. Belum dilakukan pengujian runtime pada instalasi Laravel milik pengguna.
+Route pendaftaran yang digunakan adalah route yang sudah tersedia: `register.create` dengan parameter `role=owner`.

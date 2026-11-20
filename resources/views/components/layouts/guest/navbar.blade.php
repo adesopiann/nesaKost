@@ -65,7 +65,7 @@
                     Cari Kost
                 </a>
 
-                <a href="{{ route('guest.home') }}#pemilik"
+                <a href="{{ route('guest.owner') }}"
                     class="text-sm font-medium text-slate-600 transition hover:text-blue-900">
                     Untuk Pemilik Kost
                 </a>
@@ -196,7 +196,7 @@
                     Cari Kost
                 </a>
 
-                <a href="{{ route('guest.home') }}#pemilik" class="text-sm font-medium text-slate-600">
+                <a href="{{ route('guest.owner') }}" class="text-sm font-medium text-slate-600">
                     Untuk Pemilik Kost
                 </a>
 

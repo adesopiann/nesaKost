@@ -25,6 +25,11 @@
                             'url' => '/tenant/dashboard',
                         ],
                         [
+                            'label' => 'Cari Kamar',
+                            'route' => 'guest.home',
+                            'url' => '/guest/home',
+                        ],
+                        [
                             'label' => 'Kamar Saya',
                             'route' => 'tenant.kamar-saya',
                             'url' => '/tenant/kamar-saya',
