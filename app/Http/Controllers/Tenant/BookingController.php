@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Room;
 use App\Services\RoomAvailabilityService;
+use App\Services\TenantRentalPeriodGuard;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ class BookingController extends Controller
 {
     public function store(
         Request $request,
-        RoomAvailabilityService $availabilityService
+        RoomAvailabilityService $availabilityService,
+        TenantRentalPeriodGuard $periodGuard
     ) {
         $validated = $request->validate([
             'room_id' => ['required', 'integer', 'exists:room,id'],
@@ -40,21 +42,6 @@ class BookingController extends Controller
 
         $startDate = CarbonImmutable::parse($validated['start_date'])->startOfDay();
 
-        // Tenant boleh membuat booking reguler untuk periode setelah rent
-        // yang sedang berjalan berakhir. Rent yang masih mencakup tanggal
-        // mulai booking baru tetap mencegah booking tersebut.
-        $hasOverlappingRent = $tenant->rents()
-            ->whereIn('status', ['scheduled', 'active'])
-            ->whereDate('start_date', '<=', $startDate->toDateString())
-            ->whereDate('end_date', '>=', $startDate->toDateString())
-            ->exists();
-
-        if ($hasOverlappingRent) {
-            throw ValidationException::withMessages([
-                'room_id' => 'Kamu masih memiliki masa sewa yang mencakup tanggal mulai booking. Pilih tanggal setelah masa sewa tersebut berakhir.',
-            ]);
-        }
-
         $durationMonth = (int) $validated['duration_month'];
 
         $endDate = $startDate
@@ -67,8 +54,19 @@ class BookingController extends Controller
             $startDate,
             $endDate,
             $durationMonth,
-            $availabilityService
+            $availabilityService,
+            $periodGuard
         ) {
+            // Kunci baris tenant terlebih dahulu agar booking reguler dan
+            // renewal untuk tenant yang sama tidak lolos secara bersamaan.
+            $lockedTenant = $periodGuard->lockTenant($tenant->id);
+
+            if ($periodGuard->hasConflict($lockedTenant, $startDate, $endDate)) {
+                throw ValidationException::withMessages([
+                    'room_id' => 'Periode yang kamu pilih bertabrakan dengan masa sewa atau booking lain yang masih menunggu pembayaran. Pilih periode tanggal yang berbeda.',
+                ]);
+            }
+
             // Kunci baris kamar selama transaksi untuk mengurangi risiko
             // dua booking bersamaan pada kamar yang sama.
             $room = Room::query()

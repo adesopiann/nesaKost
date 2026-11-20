@@ -1,5 +1,5 @@
 <nav class="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-6 py-4">
 
         {{-- LOGO --}}
         <a href="{{ route('guest.home') }}" class="flex shrink-0 items-center gap-2">
@@ -154,7 +154,73 @@
             @endguest
         </div>
 
-        {{-- TOMBOL MOBILE --}}
+        {{-- NOTIFIKASI MOBILE TENANT --}}
+        @if (auth()->check() && auth()->user()->role === 'tenant')
+            @php
+                $mobileTenantUnreadCount = auth()->user()->unreadNotifications()->count();
+                $mobileTenantLatestNotifications = auth()->user()->notifications()->latest()->take(5)->get();
+            @endphp
+
+            <div class="relative ml-auto mr-2 shrink-0 lg:hidden" id="tenant-mobile-notification-wrapper">
+                <button type="button" id="tenant-mobile-notification-button"
+                    class="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50"
+                    aria-label="Buka notifikasi" aria-expanded="false"
+                    aria-controls="tenant-mobile-notification-dropdown">
+                    <i data-feather="bell" class="h-5 w-5"></i>
+
+                    @if ($mobileTenantUnreadCount > 0)
+                        <span
+                            class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">
+                            {{ $mobileTenantUnreadCount > 99 ? '99+' : $mobileTenantUnreadCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <div id="tenant-mobile-notification-dropdown"
+                    class="fixed right-3 z-[60] mt-2 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+                    style="width: min(320px, calc(100vw - 24px)); max-width: calc(100vw - 24px); box-sizing: border-box;">
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+                        <span class="text-sm font-semibold text-slate-900">Notifikasi</span>
+                        <a href="{{ route('tenant.notifications.index') }}"
+                            class="shrink-0 text-xs font-medium text-blue-900 hover:underline">
+                            Lihat Semua
+                        </a>
+                    </div>
+
+                    <div class="max-h-96 overflow-y-auto">
+                        @forelse ($mobileTenantLatestNotifications as $item)
+                            @php
+                                $mobileItemData = $item->data ?? [];
+                            @endphp
+
+                            <a href="{{ route('tenant.notifications.open', $item->id) }}"
+                                class="flex min-w-0 items-start gap-2 border-b border-slate-100 px-4 py-3 last:border-0 hover:bg-slate-50 {{ $item->read_at ? '' : 'bg-blue-50/60' }}">
+                                @if (is_null($item->read_at))
+                                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-700"></span>
+                                @endif
+
+                                <span class="min-w-0 flex-1 break-words">
+                                    <span class="block break-words text-xs font-semibold text-slate-800">
+                                        {{ $mobileItemData['title'] ?? 'Notifikasi' }}
+                                    </span>
+                                    <span class="mt-1 block break-words text-xs leading-5 text-slate-500">
+                                        {{ $mobileItemData['message'] ?? 'Anda memiliki notifikasi baru.' }}
+                                    </span>
+                                    <span class="mt-1 block text-[10px] text-slate-400">
+                                        {{ $item->created_at ? $item->created_at->diffForHumans() : '' }}
+                                    </span>
+                                </span>
+                            </a>
+                        @empty
+                            <p class="px-4 py-8 text-center text-xs text-slate-500">
+                                Belum ada notifikasi.
+                            </p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <button type="button" id="customer-menu-button"
             class="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Buka menu"
             aria-expanded="false" aria-controls="customer-mobile-menu">
@@ -163,7 +229,6 @@
 
     </div>
 
-    {{-- NAVBAR MOBILE --}}
     <div id="customer-mobile-menu" class="hidden border-t border-slate-100 bg-white px-6 py-4 lg:hidden">
 
         <div class="flex flex-col gap-4">
@@ -182,16 +247,6 @@
                         {{ $menu['label'] }}
                     </a>
                 @endforeach
-
-                <a href="{{ route('tenant.notifications.index') }}"
-                    class="flex items-center justify-between text-sm font-medium text-slate-600">
-                    <span class="flex items-center gap-2"><i data-feather="bell" class="h-4 w-4"></i> Notifikasi</span>
-                    @php($mobileUnreadCount = auth()->user()->unreadNotifications()->count())
-                    @if ($mobileUnreadCount > 0)
-                        <span
-                            class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">{{ $mobileUnreadCount > 99 ? '99+' : $mobileUnreadCount }}</span>
-                    @endif
-                </a>
 
                 <div class="border-t border-slate-100 pt-4">
                     <form action="{{ route('logout') }}" method="POST">
@@ -243,6 +298,33 @@
         const mobileMenu = document.getElementById('customer-mobile-menu');
         const notificationButton = document.getElementById('tenant-notification-button');
         const notificationDropdown = document.getElementById('tenant-notification-dropdown');
+
+        const mobileNotificationButton = document.getElementById('tenant-mobile-notification-button');
+        const mobileNotificationDropdown = document.getElementById('tenant-mobile-notification-dropdown');
+
+        if (mobileNotificationButton && mobileNotificationDropdown) {
+            mobileNotificationButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+
+                const willOpen = mobileNotificationDropdown.classList.contains('hidden');
+                mobileNotificationDropdown.classList.toggle('hidden');
+                mobileNotificationButton.setAttribute('aria-expanded', String(willOpen));
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('#tenant-mobile-notification-wrapper')) {
+                    mobileNotificationDropdown.classList.add('hidden');
+                    mobileNotificationButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    mobileNotificationDropdown.classList.add('hidden');
+                    mobileNotificationButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
 
         if (notificationButton && notificationDropdown) {
             notificationButton.addEventListener('click', function(event) {

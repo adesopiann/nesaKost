@@ -430,76 +430,13 @@
             <div class="overflow-x-auto">
 
                 @if($recentPayments->isNotEmpty())
-
-                    <table class="w-full min-w-[650px] text-left text-sm">
-
-                        <thead class="bg-slate-50 text-xs text-slate-500">
-                            <tr>
-                                <th class="px-6 py-4 font-medium">Kode Pembayaran</th>
-                                <th class="px-6 py-4 font-medium">Tanggal</th>
-                                <th class="px-6 py-4 font-medium">Metode</th>
-                                <th class="px-6 py-4 font-medium">Jumlah</th>
-                                <th class="px-6 py-4 font-medium">Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-slate-100">
-
-                            @foreach($recentPayments as $payment)
-
-                                <tr>
-                                    <td class="px-6 py-4 font-medium text-slate-800">
-                                        {{ $payment->payment_code ?? '-' }}
-                                    </td>
-
-                                    <td class="px-6 py-4 text-slate-500">
-                                        {{ $payment->paid_at
-                                            ? $payment->paid_at->format('d M Y')
-                                            : $payment->created_at->format('d M Y') }}
-                                    </td>
-
-                                    <td class="px-6 py-4 text-slate-500">
-                                        {{ $payment->payment_method ?? '-' }}
-                                    </td>
-
-                                    <td class="px-6 py-4 font-medium text-slate-800">
-                                        Rp{{ number_format((float) $payment->amount, 0, ',', '.') }}
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        @if($payment->status === 'paid')
-                                            <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
-                                                Berhasil
-                                            </span>
-                                        @elseif($payment->status === 'pending')
-                                            <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                                                Menunggu
-                                            </span>
-                                        @elseif($payment->status === 'failed')
-                                            <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
-                                                Gagal
-                                            </span>
-                                        @else
-                                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                                                {{ ucfirst($payment->status) }}
-                                            </span>
-                                        @endif
-                                    </td>
-                                </tr>
-
-                            @endforeach
-
-                        </tbody>
-                    </table>
-
+                    @include('components.tenant.payment-table', ['payments' => $recentPayments])
                 @else
-
                     <div class="py-10 text-center">
                         <p class="text-sm text-slate-500">
                             Belum ada riwayat pembayaran.
                         </p>
                     </div>
-
                 @endif
 
             </div>

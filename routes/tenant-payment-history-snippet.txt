@@ -1,0 +1,10 @@
+// Tambahkan import bersama controller tenant lainnya:
+use App\Http\Controllers\Tenant\PaymentHistoryController;
+
+// Tambahkan di dalam group prefix('tenant')->name('tenant.')->middleware('role:tenant'):
+Route::get('/riwayat-pembayaran', [PaymentHistoryController::class, 'index'])
+    ->name('riwayat-pembayaran');
+
+Route::get('/riwayat-pembayaran/{paymentId}', [PaymentHistoryController::class, 'show'])
+    ->whereNumber('paymentId')
+    ->name('riwayat-pembayaran.show');

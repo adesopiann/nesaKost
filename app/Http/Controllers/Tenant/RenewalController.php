@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Rent;
 use App\Models\Room;
 use App\Services\RoomAvailabilityService;
+use App\Services\TenantRentalPeriodGuard;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,8 @@ class RenewalController extends Controller
     public function store(
         Request $request,
         int $rentId,
-        RoomAvailabilityService $availabilityService
+        RoomAvailabilityService $availabilityService,
+        TenantRentalPeriodGuard $periodGuard
     ) {
         $validated = $request->validate([
             'duration_month' => ['required', 'integer', 'in:1,3,6'],
@@ -56,8 +58,12 @@ class RenewalController extends Controller
 
         try {
             $booking = DB::transaction(function () use (
-                $tenant, $rentId, $validated, $availabilityService
+                $tenant, $rentId, $validated, $availabilityService, $periodGuard
             ) {
+                // Gunakan baris tenant sebagai mutex bersama dengan proses
+                // booking reguler agar kedua alur tidak membuat periode ganda.
+                $lockedTenant = $periodGuard->lockTenant($tenant->id);
+
                 $rent = Rent::query()
                     ->where('tenant_id', $tenant->id)
                     ->lockForUpdate()
@@ -87,6 +93,12 @@ class RenewalController extends Controller
                 $startDate = CarbonImmutable::parse($rent->end_date)->addDay();
                 $duration = (int) $validated['duration_month'];
                 $endDate = $startDate->addMonthsNoOverflow($duration)->subDay();
+
+                if ($periodGuard->hasConflict($lockedTenant, $startDate, $endDate)) {
+                    throw ValidationException::withMessages([
+                        'duration_month' => 'Periode perpanjangan bertabrakan dengan masa sewa atau booking lain yang masih menunggu pembayaran.',
+                    ]);
+                }
 
                 $availability = $availabilityService->checkPeriod(
                     $room,

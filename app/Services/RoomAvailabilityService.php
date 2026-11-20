@@ -7,6 +7,7 @@ use App\Models\Rent;
 use App\Models\Room;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class RoomAvailabilityService
@@ -174,14 +175,22 @@ class RoomAvailabilityService
         }
 
         // 2. Periksa benturan dengan rent.
-        $conflictingRent = Rent::query()
+        $rentQuery = Rent::query()
             ->where('room_id', $room->id)
             ->whereIn('status', self::BLOCKING_RENT_STATUSES)
             ->when($excludeRentId, fn ($query) => $query->where('id', '!=', $excludeRentId))
             ->whereDate('start_date', '<=', $end->toDateString())
             ->whereDate('end_date', '>=', $start->toDateString())
-            ->orderBy('end_date')
-            ->first();
+            ->orderBy('end_date');
+
+        // Di dalam transaksi booking/renewal, gunakan locking read (current read).
+        // Ini memastikan hasil pemeriksaan melihat commit transaksi lain yang
+        // mungkin selesai ketika request ini sedang menunggu lock baris kamar.
+        if (DB::transactionLevel() > 0) {
+            $rentQuery->lockForUpdate();
+        }
+
+        $conflictingRent = $rentQuery->first();
 
         if ($conflictingRent) {
             return $this->unavailable(
@@ -197,7 +206,7 @@ class RoomAvailabilityService
         // 3. Periksa benturan dengan booking yang masih berlaku.
         $now = now();
 
-        $conflictingBooking = Booking::query()
+        $bookingQuery = Booking::query()
             ->where('room_id', $room->id)
             ->where(function ($query) use ($now) {
                 $query->where('status', 'confirmed')
@@ -212,8 +221,13 @@ class RoomAvailabilityService
                     });
             })
             ->whereDate('start_date', '<=', $end->toDateString())
-            ->whereDate('end_date', '>=', $start->toDateString())
-            ->first();
+            ->whereDate('end_date', '>=', $start->toDateString());
+
+        if (DB::transactionLevel() > 0) {
+            $bookingQuery->lockForUpdate();
+        }
+
+        $conflictingBooking = $bookingQuery->first();
 
         if ($conflictingBooking) {
             return $this->unavailable(
@@ -280,8 +294,13 @@ private function checkRenewalPriority(
         // Renewal yang sudah pernah diajukan tidak lagi memakai hold umum.
         // Booking pending yang belum expired tetap memblokir melalui query booking.
         ->whereDoesntHave('renewalBookings')
-        ->orderBy('end_date')
-        ->get();
+        ->orderBy('end_date');
+
+    if (DB::transactionLevel() > 0) {
+        $existingRents->lockForUpdate();
+    }
+
+    $existingRents = $existingRents->get();
 
     foreach ($existingRents as $rent) {
         $rentEnd = CarbonImmutable::parse($rent->end_date);

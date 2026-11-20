@@ -1,0 +1,10 @@
+// Tambahkan import berikut bersama import controller tenant lainnya:
+use App\Http\Controllers\Tenant\RentInformationController;
+
+// Tambahkan dua route ini di dalam group prefix('tenant')->name('tenant.')->middleware('role:tenant'):
+Route::get('/informasi-sewa', [RentInformationController::class, 'index'])
+    ->name('informasi-sewa');
+
+Route::get('/informasi-sewa/{rentId}', [RentInformationController::class, 'show'])
+    ->whereNumber('rentId')
+    ->name('informasi-sewa.show');

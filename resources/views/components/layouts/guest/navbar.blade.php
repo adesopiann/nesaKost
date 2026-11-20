@@ -183,16 +183,6 @@
                     </a>
                 @endforeach
 
-                <a href="{{ route('tenant.notifications.index') }}"
-                    class="flex items-center justify-between text-sm font-medium text-slate-600">
-                    <span class="flex items-center gap-2"><i data-feather="bell" class="h-4 w-4"></i> Notifikasi</span>
-                    @php($mobileUnreadCount = auth()->user()->unreadNotifications()->count())
-                    @if ($mobileUnreadCount > 0)
-                        <span
-                            class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">{{ $mobileUnreadCount > 99 ? '99+' : $mobileUnreadCount }}</span>
-                    @endif
-                </a>
-
                 <div class="border-t border-slate-100 pt-4">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf

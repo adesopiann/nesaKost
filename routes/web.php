@@ -16,6 +16,10 @@ use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\PaymentController;
 use App\Http\Controllers\Tenant\RenewalController;
 use App\Http\Controllers\Tenant\NotificationController;
+use App\Http\Controllers\Tenant\MyRoomController;
+use App\Http\Controllers\Tenant\RentInformationController;
+use App\Http\Controllers\Tenant\PaymentHistoryController;
+use App\Http\Controllers\Tenant\ProfileController;
 
 Route::get('/', [HomeController::class, 'index'])
     ->name('guest.home');
@@ -100,6 +104,9 @@ Route::middleware('auth')->group(function () {
            Route::get('/dashboard', [TenantDashboardController::class, 'index'])
                 ->name('dashboard');
 
+            Route::get('/kamar-saya', [MyRoomController::class, 'index'])
+                ->name('kamar-saya');
+
             Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
             Route::get('/notifications/{notificationId}/open', [NotificationController::class, 'open'])->name('notifications.open');
             Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -154,8 +161,29 @@ Route::middleware('auth')->group(function () {
                     ->whereNumber('paymentId')
                     ->name('bookings.payments.simulate');
         
+            Route::get('/informasi-sewa', [RentInformationController::class, 'index'])
+                ->name('informasi-sewa');
+            
+            Route::get('/riwayat-pembayaran', [PaymentHistoryController::class, 'index'])
+                ->name('riwayat-pembayaran');
 
+            Route::get('/riwayat-pembayaran/{paymentId}', [PaymentHistoryController::class, 'show'])
+                ->whereNumber('paymentId')
+                ->name('riwayat-pembayaran.show');
 
-            // Tambahkan route booking, sewa, dan pembayaran di sini.
+            Route::get('/profil', [ProfileController::class, 'index'])->name('profil.index');
+            Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
+            Route::post('/profil/email/send', [ProfileController::class, 'sendEmailOtp'])
+                ->middleware('throttle:5,1')
+                ->name('profil.email.send');
+            Route::post('/profil/email/verify', [ProfileController::class, 'verifyEmail'])
+                ->middleware('throttle:5,1')
+                ->name('profil.email.verify');
+            Route::delete('/profil/email/cancel', [ProfileController::class, 'cancelEmailChange'])
+                ->name('profil.email.cancel');
+                Route::put('/profil/password', [ProfileController::class, 'updatePassword'])
+            ->middleware('throttle:5,1')
+            ->name('profil.password.update');
+
         });
 });

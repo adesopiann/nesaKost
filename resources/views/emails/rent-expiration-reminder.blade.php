@@ -8,7 +8,7 @@
 <body style="margin:0;padding:32px 16px;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
     <div style="max-width:560px;margin:0 auto;overflow:hidden;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
         <div style="padding:22px 30px;background-color:#1d4e80;">
-            <div style="font-size:21px;font-weight:700;letter-spacing:.2px;color:#ffffff;">eKost</div>
+            <div style="font-size:21px;font-weight:700;letter-spacing:.2px;color:#ffffff;">nesaKost</div>
             <div style="margin-top:4px;font-size:12px;color:#dbeafe;">Informasi dan pengingat masa sewa</div>
         </div>
 
@@ -58,12 +58,12 @@
             @endif
 
             <p style="margin:0;font-size:12px;line-height:1.7;color:#9ca3af;">
-                Email ini dikirim secara otomatis oleh eKost. Jika membutuhkan informasi lebih lanjut, silakan masuk ke akun eKost Anda.
+                Email ini dikirim secara otomatis oleh nesaKost. Jika membutuhkan informasi lebih lanjut, silakan masuk ke akun nesaKost Anda.
             </p>
         </div>
 
         <div style="padding:16px 30px;background-color:#f8fafc;border-top:1px solid #e5e7eb;text-align:center;font-size:11px;color:#9ca3af;">
-            © {{ date('Y') }} eKost. Pesan otomatis, mohon tidak membalas email ini.
+            © {{ date('Y') }} nesaKost. Pesan otomatis, mohon tidak membalas email ini.
         </div>
     </div>
 </body>
