@@ -1,5 +1,7 @@
 @extends('components.layouts.owner.container')
 @section('main')
+
+    @include('components.owner.room-status-blockers')
 <div class="space-y-6 text-slate-800">
     <section class="rounded-xl bg-white p-6 shadow-sm">
         <p class="text-sm text-slate-500"><a href="{{ route('owner.rooms.index') }}" class="hover:text-blue-800">Data Kamar</a> / <a href="{{ route('owner.rooms.show', $room->id) }}" class="hover:text-blue-800">{{ $room->room_code }}</a> / <span class="font-semibold text-blue-800">Edit Kamar</span></p>
@@ -16,7 +18,12 @@
             <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-blue-900">Entitas target: room</span>
         </div>
     </section>
-    <form method="POST" enctype="multipart/form-data" action="{{ route('owner.rooms.update', $room->id) }}" class="space-y-6">
+    <form method="POST" enctype="multipart/form-data" action="{{ route('owner.rooms.update', $room->id) }}"
+        class="space-y-6"
+        data-confirm-modal
+        data-confirm-title="Konfirmasi perubahan status kamar"
+        data-confirm-message="Kamu mengubah status kamar {{ $room->room_code }}. Perubahan status hanya boleh dilakukan jika kamar tidak memiliki booking maupun penyewaan. Lanjutkan?"
+        data-confirm-accept="Ya, simpan perubahan">
         @csrf
         @method('PUT')
         <section class="space-y-6 rounded-xl bg-white p-6 shadow-sm md:p-8">
@@ -28,4 +35,5 @@
         </section>
     </form>
 </div>
+@include('components.owner.confirm-modal')
 @endsection

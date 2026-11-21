@@ -1,6 +1,8 @@
 @extends('components.layouts.owner.container')
 @section('main')
-    <div class="space-y-6 text-slate-800">
+    
+    @include('components.owner.room-status-blockers')
+<div class="space-y-6 text-slate-800">
         @include('pages.owner.rooms.partials.flash')
         <section
             class="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
@@ -71,58 +73,146 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($rooms as $room)
+                            @php
+                                $operationalClasses = [
+                                    'active' => 'bg-emerald-100 text-emerald-800',
+                                    'inactive' => 'bg-slate-100 text-slate-600',
+                                    'maintenance' => 'bg-amber-100 text-amber-800',
+                                ];
+                                $operationalLabels = [
+                                    'active' => 'Aktif',
+                                    'inactive' => 'Nonaktif',
+                                    'maintenance' => 'Perawatan',
+                                ];
+                                $availability = $room->availability ?? [];
+                                $availabilityStatus = $availability['status'] ?? 'unavailable';
+                                $availabilityClasses = [
+                                    'available' => 'bg-emerald-100 text-emerald-800',
+                                    'occupied' => 'bg-blue-100 text-blue-800',
+                                    'reserved' => 'bg-indigo-100 text-indigo-800',
+                                    'renewal_priority' => 'bg-amber-100 text-amber-800',
+                                    'unavailable' => 'bg-slate-100 text-slate-600',
+                                ];
+                                $availabilityLabels = [
+                                    'available' => 'Tersedia',
+                                    'occupied' => 'Terisi',
+                                    'reserved' => 'Dipesan',
+                                    'renewal_priority' => 'Prioritas Renewal',
+                                    'unavailable' => 'Tidak tersedia',
+                                ];
+                                $hasHistory = ($room->bookings_count ?? 0) > 0 || ($room->rents_count ?? 0) > 0;
+                            @endphp
                             <tr class="hover:bg-slate-50">
-                                <td class="px-6 py-5">
-                                    @php
-                                        $operationalClasses = [
-                                            'active' => 'bg-emerald-100 text-emerald-800',
-                                            'inactive' => 'bg-slate-100 text-slate-600',
-                                            'maintenance' => 'bg-amber-100 text-amber-800',
-                                        ];
-
-                                        $operationalLabels = [
-                                            'active' => 'Aktif',
-                                            'inactive' => 'Nonaktif',
-                                            'maintenance' => 'Perawatan',
-                                        ];
-                                    @endphp
-
-                                    <span
-                                        class="rounded-full px-2.5 py-1 text-xs font-semibold
-        {{ $operationalClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        @if ($room->firstImage)
+                                            <img src="{{ asset('storage/' . $room->firstImage->image_path) }}"
+                                                alt="Foto {{ $room->room_code }}"
+                                                class="h-11 w-11 rounded-lg object-cover">
+                                        @else
+                                            <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                                                <i data-feather="image" class="h-4 w-4"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <a href="{{ route('owner.rooms.show', $room->id) }}"
+                                                class="font-semibold text-blue-900 hover:underline">
+                                                {{ $room->room_code }}
+                                            </a>
+                                            <p class="text-xs text-slate-500">ID #{{ $room->id }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">{{ $room->branch?->name ?? '-' }}</td>
+                                <td class="px-6 py-4">{{ $room->type ?: '-' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    Rp {{ number_format((float) $room->monthly_price, 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $operationalClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">
                                         {{ $operationalLabels[$room->status] ?? ucfirst($room->status) }}
                                     </span>
                                 </td>
-
-                                <td class="px-6 py-5">
-                                    @php
-                                        $availability = $room->availability ?? [];
-                                        $availabilityStatus = $availability['status'] ?? 'unavailable';
-
-                                        $availabilityClasses = [
-                                            'available' => 'bg-emerald-100 text-emerald-800',
-                                            'occupied' => 'bg-blue-100 text-blue-800',
-                                            'reserved' => 'bg-indigo-100 text-indigo-800',
-                                            'renewal_priority' => 'bg-amber-100 text-amber-800',
-                                            'unavailable' => 'bg-slate-100 text-slate-600',
-                                        ];
-
-                                        $availabilityLabels = [
-                                            'available' => 'Tersedia',
-                                            'occupied' => 'Terisi',
-                                            'reserved' => 'Dipesan',
-                                            'renewal_priority' => 'Prioritas Renewal',
-                                            'unavailable' => 'Tidak Tersedia',
-                                        ];
-                                    @endphp
-
-                                    <span
-                                        class="rounded-full px-2.5 py-1 text-xs font-semibold
-        {{ $availabilityClasses[$availabilityStatus] ?? 'bg-slate-100 text-slate-600' }}">
+                                <td class="px-6 py-4">
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $availabilityClasses[$availabilityStatus] ?? 'bg-slate-100 text-slate-600' }}">
                                         {{ $availabilityLabels[$availabilityStatus] ?? ucfirst($availabilityStatus) }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <div class="inline-flex items-center justify-end gap-2">
+                                        <a href="{{ route('owner.rooms.show', $room->id) }}"
+                                            class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                            Detail
+                                        </a>
 
+                                        <details class="relative text-left">
+                                            <summary class="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                                Lainnya
+                                                <i data-feather="chevron-down" class="h-3.5 w-3.5"></i>
+                                            </summary>
+                                            <div class="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-lg">
+                                                <a href="{{ route('owner.rooms.edit', $room->id) }}"
+                                                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                                    <i data-feather="edit-2" class="h-4 w-4"></i>
+                                                    Edit kamar
+                                                </a>
+
+                                                <div class="my-1 border-t border-slate-100"></div>
+                                                <p class="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                                                    Ubah status
+                                                </p>
+
+                                                @foreach ([
+                                                    'active' => 'Aktifkan kamar',
+                                                    'inactive' => 'Nonaktifkan kamar',
+                                                    'maintenance' => 'Tandai perawatan',
+                                                ] as $statusValue => $statusLabel)
+                                                    @if ($room->status !== $statusValue)
+                                                        <form method="POST" action="{{ route('owner.rooms.update-status', $room->id) }}"
+                                                            data-confirm-modal
+                                                            data-confirm-title="Konfirmasi perubahan status"
+                                                            data-confirm-message="Kamu akan mengubah status kamar {{ $room->room_code }} menjadi {{ strtolower($statusLabel) }}. Pastikan kamar tidak memiliki booking maupun penyewaan. Lanjutkan?"
+                                                            data-confirm-accept="Ya, ubah status">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <input type="hidden" name="status" value="{{ $statusValue }}">
+                                                            <button type="submit"
+                                                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                                                                <i data-feather="power" class="h-4 w-4"></i>
+                                                                {{ $statusLabel }}
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @endforeach
+
+                                                <div class="my-1 border-t border-slate-100"></div>
+                                                @if (!$hasHistory)
+                                                    <form method="POST" action="{{ route('owner.rooms.destroy', $room->id) }}"
+                                                        data-confirm-modal
+                                                        data-confirm-title="Hapus kamar"
+                                                        data-confirm-message="Kamar {{ $room->room_code }} akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
+                                                        data-confirm-accept="Ya, hapus kamar">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+                                                            <i data-feather="trash-2" class="h-4 w-4"></i>
+                                                            Hapus kamar
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <div class="rounded-lg px-3 py-2 text-xs text-slate-400"
+                                                        title="Kamar memiliki riwayat booking atau penyewaan.">
+                                                        <span class="flex items-center gap-2">
+                                                            <i data-feather="lock" class="h-4 w-4"></i>
+                                                            Hapus tidak tersedia: ada riwayat transaksi
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </details>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -141,4 +231,5 @@
             </div>
         </section>
     </div>
+@include('components.owner.confirm-modal')
 @endsection

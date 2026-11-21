@@ -71,6 +71,11 @@ class BookingController extends Controller
             // dua booking bersamaan pada kamar yang sama.
             $room = Room::query()
                 ->whereKey($validated['room_id'])
+                ->where('status', config('ekost.room_active_status', 'active'))
+                ->whereHas('branchDorm', fn ($query) => $query->where(
+                    'status',
+                    config('ekost.property_active_status', 'active')
+                ))
                 ->lockForUpdate()
                 ->firstOrFail();
 

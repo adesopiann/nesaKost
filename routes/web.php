@@ -4,9 +4,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\BranchDormController;
 use App\Http\Controllers\Owner\RoomController;
+use App\Http\Controllers\Owner\TransactionController;
+use App\Http\Controllers\Owner\TenantController;
+use App\Http\Controllers\Owner\FacilityController;
 
 use App\Http\Controllers\Guest\HomeController;
 use App\Http\Controllers\Guest\PropertyController;
+use App\Http\Controllers\Guest\RoomDetailController;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -30,6 +34,10 @@ Route::view('/untuk-pemilik', 'pages.guest.owner')
 Route::get('/kost/{id}', [PropertyController::class, 'show'])
     ->whereNumber('id')
     ->name('guest.properties.show');
+
+Route::get('/kamar/{roomCode}', [RoomDetailController::class, 'show'])
+    ->where('roomCode', '[A-Za-z0-9-]+')
+    ->name('guest.rooms.show');
 
 Route::get('/rooms/{roomId}/availability', [PropertyController::class, 'availability'])
     ->whereNumber('roomId')
@@ -83,7 +91,18 @@ Route::middleware('auth')->group(function () {
         Route::resource('branches', BranchDormController::class)
             ->parameters(['branches' => 'branch']);
 
+        Route::resource('fasilitas', FacilityController::class)->parameters(['fasilitas' => 'facility'])->except(['create', 'show', 'edit'])->names('facilities');
+
+        Route::get('/penyewa', [TenantController::class, 'index'])->name('tenants.index');
+        Route::get('/penyewa/{tenantId}', [TenantController::class, 'show'])->whereNumber('tenantId')->name('tenants.show');
+
         Route::resource('rooms', RoomController::class)->names('rooms');
+        Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])
+            ->whereNumber('room')
+            ->name('rooms.update-status');
+
+        Route::get('/rents', [TransactionController::class, 'rents'])->name('rents');
+        Route::get('/payments', [TransactionController::class, 'payments'])->name('payments');
 
         
     });

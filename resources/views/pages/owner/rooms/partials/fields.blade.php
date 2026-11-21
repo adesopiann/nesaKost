@@ -8,12 +8,14 @@
         </div>
         <div>
             <label for="status" class="mb-2 block text-sm font-semibold">Status Kamar <span class="text-red-500">*</span></label>
-            @php($selectedStatus = old('status', $room->status ?? 'available'))
-            <select id="status" name="status" required class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
-                <option value="available" @selected($selectedStatus === 'available')>Tersedia</option>
-                <option value="occupied" @selected($selectedStatus === 'occupied')>Terisi</option>
-                <option value="maintenance" @selected($selectedStatus === 'maintenance')>Dalam perawatan</option>
+            @php($selectedStatus = old('status', $room->status ?? 'active'))
+            <select id="status" name="status" required
+                data-status-select
+                data-initial-status="{{ $room->status ?? 'active' }}"
+                class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none">
+                <option value="active" @selected($selectedStatus === 'active')>Aktif</option>
                 <option value="inactive" @selected($selectedStatus === 'inactive')>Nonaktif</option>
+                <option value="maintenance" @selected($selectedStatus === 'maintenance')>Dalam perawatan</option>
             </select>
             @error('status')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </div>
@@ -76,6 +78,23 @@
                 <img src="{{ asset('storage/'.$room->image_path) }}" alt="Foto kamar {{ $room->room_code }}" class="h-40 w-56 rounded-lg object-cover">
             </div>
         @endif
+    </div>
+
+
+    <div>
+        <label class="mb-2 block text-sm font-semibold">Fasilitas Kamar</label>
+        <p class="mb-3 text-xs text-slate-500">Pilih fasilitas yang tersedia secara khusus di kamar ini. Fasilitas umum cabang dikelola terpisah.</p>
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            @forelse(($facilities ?? collect()) as $facility)
+                <label class="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm hover:bg-indigo-50">
+                    <input type="checkbox" name="facilities[]" value="{{ $facility->id }}" @checked(in_array($facility->id, old('facilities', $selectedFacilities ?? []))) class="mt-1 rounded border-slate-300 text-blue-800">
+                    <span><span class="font-medium">{{ $facility->facility_name }}</span>@if($facility->description)<span class="mt-1 block text-xs text-slate-500">{{ $facility->description }}</span>@endif</span>
+                </label>
+            @empty
+                <p class="text-sm text-slate-500">Belum ada master fasilitas. Tambahkan melalui menu Data Fasilitas.</p>
+            @endforelse
+        </div>
+        @error('facilities.*')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
     </div>
 
     <div>

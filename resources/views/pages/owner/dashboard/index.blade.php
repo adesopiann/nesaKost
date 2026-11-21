@@ -7,6 +7,7 @@
         $money = fn($value) => 'Rp ' . number_format((float) $value, 0, ',', '.');
         $branchColors = ['#2450D8', '#12A5E5', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#64748B'];
         $maxMethodCount = max(1, (int) ($paymentMethodTotals->max('transaction_count') ?? 1));
+        $yearOptions = range((int) $year, max((int) $year, (int) now()->year - 4));
     @endphp
 
     <div class="space-y-6">
@@ -46,24 +47,12 @@
         <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @php
                 $statCards = [
-                    [
-                        'label' => 'Total Cabang Kos',
-                        'value' => $stats['branches'],
-                        'entity' => 'cabang',
-                        'icon' => 'grid',
-                    ],
-                    [
-                        'label' => 'Total Kamar',
-                        'value' => $stats['rooms'],
-                        'entity' => 'kamar',
-                        'icon' => 'columns',
-                    ],
-                    [
-                        'label' => 'Total Penyewa',
-                        'value' => $stats['tenants'],
-                        'entity' => 'penyewa',
-                        'icon' => 'user-check',
-                    ],
+                    ['label' => 'Total Cabang Kos', 'value' => $stats['branches'], 'entity' => 'cabang', 'icon' => 'grid'],
+                    ['label' => 'Total Kamar', 'value' => $stats['rooms'], 'entity' => 'seluruh status', 'icon' => 'columns'],
+                    ['label' => 'Penyewa Aktif', 'value' => $stats['active_tenants'], 'entity' => 'penyewa saat ini', 'icon' => 'user-check'],
+                    ['label' => 'Total Penyewa Historis', 'value' => $stats['tenants'], 'entity' => 'penyewa unik', 'icon' => 'users'],
+                    ['label' => 'Booking Menunggu Pembayaran', 'value' => $stats['pending_bookings'], 'entity' => 'booking', 'icon' => 'clock'],
+                    ['label' => 'Kamar Aktif', 'value' => $stats['active_rooms'], 'entity' => 'kamar', 'icon' => 'door-open'],
                 ];
             @endphp
             @foreach ($statCards as $card)
@@ -81,6 +70,24 @@
                     </div>
                 </article>
             @endforeach
+        </section>
+
+        <section class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <article class="rounded-xl border border-slate-100 bg-white p-4">
+                <p class="text-xs font-medium text-slate-500">Kamar Aktif</p>
+                <p class="mt-1 text-2xl font-bold text-slate-800">{{ number_format($stats['active_rooms']) }}</p>
+                <p class="mt-1 text-[11px] text-slate-500">Masuk perhitungan okupansi</p>
+            </article>
+            <article class="rounded-xl border border-slate-100 bg-white p-4">
+                <p class="text-xs font-medium text-slate-500">Kamar Nonaktif</p>
+                <p class="mt-1 text-2xl font-bold text-slate-800">{{ number_format($stats['inactive_rooms']) }}</p>
+                <p class="mt-1 text-[11px] text-slate-500">Tidak masuk perhitungan okupansi</p>
+            </article>
+            <article class="rounded-xl border border-slate-100 bg-white p-4">
+                <p class="text-xs font-medium text-slate-500">Kamar Maintenance</p>
+                <p class="mt-1 text-2xl font-bold text-slate-800">{{ number_format($stats['maintenance_rooms']) }}</p>
+                <p class="mt-1 text-[11px] text-slate-500">Tidak masuk perhitungan okupansi</p>
+            </article>
         </section>
 
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
@@ -119,8 +126,8 @@
                                         {{ $branch['name'] }}
                                     </p>
                                     <p class="mt-1 text-xl font-bold text-slate-800">{{ $branch['percentage'] }}%</p>
-                                    <p class="text-[11px] text-slate-500">{{ $branch['occupied'] }} terisi /
-                                        {{ $branch['total'] }} kamar · {{ $branch['vacant'] }} kosong</p>
+                                    <p class="text-[11px] text-slate-500">{{ $branch['occupied'] }} terisi / {{ $branch['active_rooms'] }} kamar aktif · {{ $branch['vacant'] }} kosong</p>
+                                    <p class="mt-1 text-[10px] text-slate-400">Nonaktif: {{ $branch['inactive_rooms'] }} · Maintenance: {{ $branch['maintenance_rooms'] }}</p>
                                 </div>
                             </article>
                         @endforeach
@@ -131,9 +138,23 @@
 
         <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
             <article class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
-                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Data Sewa</h2>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Data Sewa</h2>
+                        <p class="mt-1 text-xs text-slate-500">Kontrak yang dibuat pada periode terpilih.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <form method="GET" action="{{ route('owner.dashboard') }}" class="flex items-center gap-2">
+                            @if ($selectedBranchId !== null)<input type="hidden" name="branch_id" value="{{ $selectedBranchId }}">@endif
+                            <input type="hidden" name="payment_month" value="{{ $paymentMonth }}"><input type="hidden" name="payment_year" value="{{ $paymentYear }}"><input type="hidden" name="year" value="{{ $year }}">
+                            <select name="rent_month" aria-label="Bulan ringkasan sewa" class="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs" onchange="this.form.submit()"><option value="" @selected($rentMonth === null)>Semua Bulan</option>@foreach($monthOptions as $number => $label)<option value="{{ $number }}" @selected($rentMonth === $number)>{{ $label }}</option>@endforeach</select>
+                            <select name="rent_year" aria-label="Tahun ringkasan sewa" class="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs" onchange="this.form.submit()"><option value="" @selected($rentYear === null)>Semua Tahun</option>@foreach($yearOptions as $optionYear)<option value="{{ $optionYear }}" @selected($rentYear === $optionYear)>{{ $optionYear }}</option>@endforeach</select>
+                        </form>
+                        <a href="{{ route('owner.rents', array_filter(['branch_id' => $selectedBranchId, 'month' => $rentMonth, 'year' => $rentYear])) }}" class="inline-flex items-center gap-1 rounded-lg bg-[#1D4E80] px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800">Data Sewa <i data-feather="arrow-up-right" class="h-3 w-3"></i></a>
+                    </div>
+                </div>
 
-                <div class="mt-5 grid grid-cols-3 gap-2">
+                <div class="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
                     <div class="rounded-lg bg-[#F0F3FF] p-3">
                         <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Total Kontrak</p>
                         <p class="mt-1 text-xl font-bold text-slate-800">{{ number_format($totalRents) }}</p>
@@ -145,15 +166,25 @@
                         <p class="mt-1 text-[11px] text-emerald-800">Status active</p>
                     </div>
                     <div class="rounded-lg bg-slate-100 p-3">
+                        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Terjadwal</p>
+                        <p class="mt-1 text-xl font-bold text-slate-700">{{ number_format($scheduledRents) }}</p>
+                        <p class="mt-1 text-[11px] text-slate-500">Belum dimulai</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-100 p-3">
                         <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Selesai</p>
                         <p class="mt-1 text-xl font-bold text-slate-700">{{ number_format($finishedRents) }}</p>
                         <p class="mt-1 text-[11px] text-slate-500">Kontrak selesai</p>
+                    </div>
+                    <div class="rounded-lg bg-rose-50 p-3">
+                        <p class="text-[10px] font-semibold uppercase tracking-wide text-rose-700">Dibatalkan</p>
+                        <p class="mt-1 text-xl font-bold text-rose-700">{{ number_format($cancelledRents) }}</p>
+                        <p class="mt-1 text-[11px] text-rose-700">Kontrak batal</p>
                     </div>
                 </div>
 
                 <div class="mt-5">
                     <div class="flex items-center justify-between gap-3 text-xs">
-                        <span class="font-medium text-slate-600">Rasio Okupansi Kamar ({{ $occupiedRooms }} /
+                        <span class="font-medium text-slate-600">Rasio Okupansi Kamar Aktif ({{ $occupiedRooms }} /
                             {{ $roomCount }})</span>
                         <span
                             class="font-semibold text-slate-700">{{ $roomCount > 0 ? round(($occupiedRooms / $roomCount) * 100) : 0 }}%
@@ -165,22 +196,29 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ url('/owner/sewa') }}"
-                    class="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-xs font-semibold text-[#315F96] transition hover:bg-blue-100">
-                    Kelola Data Sewa <i data-feather="arrow-right" class="h-4 w-4"></i>
-                </a>
+                <p class="mt-5 rounded-lg bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">Ringkasan sewa mengikuti cabang yang sedang dipilih.</p>
             </article>
 
             <article class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
-                <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Pembayaran</h2>
-                <p class="mt-1 text-xs text-slate-500">Akumulasi pembayaran dengan tanggal pembayaran terisi.</p>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div><h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Ringkasan Pembayaran</h2><p class="mt-1 text-xs text-slate-500">Pembayaran berhasil yang diterima pada periode terpilih.</p></div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <form method="GET" action="{{ route('owner.dashboard') }}" class="flex items-center gap-2">
+                            @if ($selectedBranchId !== null)<input type="hidden" name="branch_id" value="{{ $selectedBranchId }}">@endif
+                            <input type="hidden" name="rent_month" value="{{ $rentMonth }}"><input type="hidden" name="rent_year" value="{{ $rentYear }}"><input type="hidden" name="year" value="{{ $year }}">
+                            <select name="payment_month" aria-label="Bulan ringkasan pembayaran" class="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs" onchange="this.form.submit()"><option value="" @selected($paymentMonth === null)>Semua Bulan</option>@foreach($monthOptions as $number => $label)<option value="{{ $number }}" @selected($paymentMonth === $number)>{{ $label }}</option>@endforeach</select>
+                            <select name="payment_year" aria-label="Tahun ringkasan pembayaran" class="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs" onchange="this.form.submit()"><option value="" @selected($paymentYear === null)>Semua Tahun</option>@foreach($yearOptions as $optionYear)<option value="{{ $optionYear }}" @selected($paymentYear === $optionYear)>{{ $optionYear }}</option>@endforeach</select>
+                        </form>
+                        <a href="{{ route('owner.payments', array_filter(['branch_id' => $selectedBranchId, 'month' => $paymentMonth, 'year' => $paymentYear])) }}" class="inline-flex items-center gap-1 rounded-lg bg-[#1D4E80] px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800">Data Pembayaran <i data-feather="arrow-up-right" class="h-3 w-3"></i></a>
+                    </div>
+                </div>
                 <div class="mt-5 rounded-lg bg-[#F0F3FF] p-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Total Pembayaran Tercatat
+                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Pendapatan Diterima pada Periode Ini
                     </p>
                     <p class="mt-1 text-2xl font-extrabold tracking-tight text-[#1D4E80] sm:text-3xl">
                         {{ $money($totalPaidAmount) }}</p>
                     <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
-                        <span>Total pembayaran terverifikasi</span>
+                        <span>Pembayaran berhasil diterima</span>
                         <strong class="text-slate-700">{{ number_format($paidTransactions) }} transaksi</strong>
                     </div>
                 </div>
@@ -203,11 +241,23 @@
                             terverifikasi.</p>
                     @endforelse
                 </div>
-                <a href="{{ url('/owner/pembayaran') }}"
-                    class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#1D4E80] px-4 py-3 text-xs font-semibold text-white transition hover:bg-[#173e66]">
-                    Kelola Data Pembayaran <i data-feather="arrow-right" class="h-4 w-4"></i>
-                </a>
+                <p class="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">Data pembayaran ditampilkan untuk pemantauan.</p>
             </article>
+        </section>
+
+        <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800">Ringkasan Booking</h2>
+                    <p class="mt-1 text-xs text-slate-500">Status seluruh booking pada cabang yang dipilih.</p>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div class="rounded-lg bg-amber-50 p-3"><p class="text-[10px] font-semibold uppercase tracking-wide text-amber-700">Menunggu Pembayaran</p><p class="mt-1 text-2xl font-bold text-amber-800">{{ number_format($bookingSummary['pending_payment']) }}</p></div>
+                <div class="rounded-lg bg-emerald-50 p-3"><p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">Dikonfirmasi</p><p class="mt-1 text-2xl font-bold text-emerald-800">{{ number_format($bookingSummary['confirmed']) }}</p></div>
+                <div class="rounded-lg bg-slate-100 p-3"><p class="text-[10px] font-semibold uppercase tracking-wide text-slate-600">Kedaluwarsa</p><p class="mt-1 text-2xl font-bold text-slate-700">{{ number_format($bookingSummary['expired']) }}</p></div>
+                <div class="rounded-lg bg-rose-50 p-3"><p class="text-[10px] font-semibold uppercase tracking-wide text-rose-700">Dibatalkan</p><p class="mt-1 text-2xl font-bold text-rose-800">{{ number_format($bookingSummary['cancelled']) }}</p></div>
+            </div>
         </section>
 
         <section class="rounded-xl border border-slate-100 bg-white p-5 sm:p-6">
@@ -216,8 +266,17 @@
                     <h2 class="flex items-center gap-2 text-base font-semibold text-slate-800">Pendapatan Bulanan per Cabang
                     </h2>
                 </div>
-                <span class="rounded-md bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#315F96]">Tahun
-                    {{ $year }}</span>
+                <form method="GET" action="{{ route('owner.dashboard') }}" class="flex items-center gap-2">
+                    @if ($selectedBranchId !== null)
+                        <input type="hidden" name="branch_id" value="{{ $selectedBranchId }}">
+                    @endif
+                    <label for="dashboard-year" class="text-xs font-medium text-slate-500">Tahun</label>
+                    <select id="dashboard-year" name="year" onchange="this.form.submit()" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none"><option value="" @selected($year === null)>Semua Tahun</option>
+                        @foreach ($yearOptions as $optionYear)
+                            <option value="{{ $optionYear }}" @selected((int) $year === (int) $optionYear)>{{ $optionYear }}</option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
             <div class="mt-4 rounded-lg bg-[#F0F3FF] p-3 sm:p-5">
                 <div class="h-[280px] sm:h-[320px]">
@@ -227,17 +286,75 @@
             </div>
         </section>
 
+        <section class="grid grid-cols-1 gap-5 xl:grid-cols-2">
+            <article class="overflow-hidden rounded-xl border border-slate-100 bg-white">
+                <div class="border-b border-slate-100 px-5 py-4">
+                    <h2 class="text-base font-semibold text-slate-800">Sewa Segera Berakhir</h2>
+                    <p class="mt-1 text-xs text-slate-500">Penyewa dengan masa sewa berakhir dalam tujuh hari ke depan.</p>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    @forelse ($expiringRents as $rent)
+                        @php $name = trim(($rent->fname ?? '') . ' ' . ($rent->lname ?? '')) ?: 'Penyewa'; @endphp
+                        <div class="flex items-center justify-between gap-3 px-5 py-3">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-800">{{ $name }}</p>
+                                <p class="mt-1 text-[11px] text-slate-500">{{ $rent->room_code }} · {{ $rent->branch_name }} · {{ $rent->rent_code }}</p>
+                            </div>
+                            <div class="shrink-0 text-right">
+                                <p class="text-xs font-semibold text-rose-700">{{ \Carbon\Carbon::parse($rent->end_date)->format('d M Y') }}</p>
+                                <p class="mt-1 text-[10px] text-slate-500">{{ $rent->days_remaining === 0 ? 'Berakhir hari ini' : $rent->days_remaining . ' hari lagi' }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="px-5 py-8 text-center text-xs text-slate-500">Tidak ada sewa yang berakhir dalam tujuh hari ke depan.</p>
+                    @endforelse
+                </div>
+            </article>
+
+            <article class="overflow-hidden rounded-xl border border-slate-100 bg-white">
+                <div class="border-b border-slate-100 px-5 py-4">
+                    <h2 class="text-base font-semibold text-slate-800">Aktivitas Terbaru</h2>
+                    <p class="mt-1 text-xs text-slate-500">Aktivitas booking, sewa, dan pembayaran.</p>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    @forelse ($recentActivities as $activity)
+                        @php
+                            $activityName = trim($activity->tenant_name ?? '') ?: 'Penyewa';
+                            $activityLabel = ['booking' => 'Booking', 'rent' => 'Sewa', 'payment' => 'Pembayaran'][$activity->activity_type] ?? 'Aktivitas';
+                            $statusLabel = [
+                                'pending_payment' => 'Menunggu pembayaran', 'confirmed' => 'Dikonfirmasi',
+                                'expired' => 'Kedaluwarsa', 'cancelled' => 'Dibatalkan', 'scheduled' => 'Terjadwal',
+                                'active' => 'Aktif', 'completed' => 'Selesai', 'paid' => 'Berhasil',
+                                'pending' => 'Menunggu', 'failed' => 'Gagal',
+                            ][$activity->activity_status] ?? ucfirst($activity->activity_status);
+                        @endphp
+                        <div class="flex items-center justify-between gap-3 px-5 py-3">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-800">{{ $activityLabel }} · {{ $activityName }}</p>
+                                <p class="mt-1 truncate text-[11px] text-slate-500">{{ $activity->reference_code ?: '-' }} · {{ $activity->room_code }} · {{ $activity->branch_name }}</p>
+                            </div>
+                            <div class="shrink-0 text-right">
+                                <p class="text-xs font-semibold text-slate-700">{{ $statusLabel }}</p>
+                                <p class="mt-1 text-[10px] text-slate-500">{{ \Carbon\Carbon::parse($activity->activity_at)->format('d M Y H:i') }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="px-5 py-8 text-center text-xs text-slate-500">Belum ada aktivitas untuk ditampilkan.</p>
+                    @endforelse
+                </div>
+            </article>
+        </section>
+
         <section class="overflow-hidden rounded-xl border border-slate-100 bg-white">
             <div class="flex flex-col gap-3 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div>
                     <h2 class="text-base font-semibold text-slate-800">Pembayaran Terbaru</h2>
-                    <p class="mt-1 text-xs text-slate-500">Lima pembayaran terbaru yang telah memiliki tanggal pembayaran.
-                    </p>
+                    <p class="mt-1 text-xs text-slate-500">Lima transaksi terbaru yang berstatus paid.</p>
                 </div>
-                <a href="{{ url('/owner/pembayaran') }}"
-                    class="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-[#315F96] transition hover:bg-blue-100 sm:self-auto">
-                    Lihat Semua Pembayaran <i data-feather="arrow-right" class="h-4 w-4"></i>
-                </a>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <a href="{{ route('owner.payments', array_filter(['branch_id' => $selectedBranchId, 'month' => $paymentMonth, 'year' => $paymentYear])) }}" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#1D4E80] hover:bg-slate-50">Lihat semua pembayaran</a>
+                    <input id="dashboard-search" type="search" placeholder="Cari pembayaran..." class="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none sm:w-48">
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table id="recent-payments-table" class="min-w-[850px] w-full border-collapse text-left">
@@ -263,8 +380,7 @@
                             <tr class="payment-row hover:bg-slate-50"
                                 data-search="{{ strtolower(($payment->payment_code ?? '') . ' ' . ($payment->booking_code ?? '') . ' ' . $tenantName . ' ' . ($payment->payment_method ?? '')) }}">
                                 <td class="whitespace-nowrap px-5 py-4">{{ $paidDate }}</td>
-                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-[#315F96]">
-                                    {{ $payment->payment_code }}</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-[#315F96]"><a href="{{ route('owner.payments', ['q' => $payment->payment_code, 'month' => \Carbon\Carbon::parse($payment->paid_at)->month, 'year' => \Carbon\Carbon::parse($payment->paid_at)->year, 'branch_id' => $selectedBranchId]) }}" class="hover:underline">{{ $payment->payment_code }}</a></td>
                                 <td class="whitespace-nowrap px-5 py-4">{{ $payment->booking_code }}</td>
                                 <td class="whitespace-nowrap px-5 py-4 font-medium text-slate-800">{{ $tenantName }}
                                 </td>

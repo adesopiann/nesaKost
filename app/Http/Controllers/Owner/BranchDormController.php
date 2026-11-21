@@ -81,7 +81,11 @@ class BranchDormController extends Controller
     {
         $this->authorizeBranch($branch);
 
-        $branch->load(['owner.user', 'facilities', 'rooms']);
+        $branch->load([
+            'owner.user',
+            'facilities' => fn ($query) => $query->where('facility.facility_type', 'branch')->orderBy('facility_name'),
+            'rooms',
+        ]);
         $totalRooms = $branch->rooms->count();
         $occupiedRooms = $branch->rooms->whereIn('status', ['occupied', 'terisi'])->count();
         $availableRooms = $branch->rooms->whereIn('status', ['available', 'kosong'])->count();
@@ -97,7 +101,7 @@ class BranchDormController extends Controller
     public function create(): View
     {
         $owner = $this->currentOwner();
-        $facilities = Facility::orderBy('facility_name')->get();
+        $facilities = Facility::where('owner_id', $owner->id)->where('facility_type', 'branch')->orderBy('facility_name')->get();
 
         return view('pages.owner.branches.create', compact('owner', 'facilities'));
     }
@@ -112,7 +116,7 @@ class BranchDormController extends Controller
             'gender_type' => ['required', Rule::in(['putra', 'putri', 'campuran'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'facilities' => ['nullable', 'array'],
-            'facilities.*' => ['integer', 'distinct', 'exists:facility,id'],
+            'facilities.*' => ['integer', 'distinct', Rule::exists('facility', 'id')->where(fn ($query) => $query->where('owner_id', $this->currentOwner()->id)->where('facility_type', 'branch'))],
         ];
     }
 
@@ -157,7 +161,7 @@ class BranchDormController extends Controller
         $this->authorizeBranch($branch);
 
         $branch->load(['owner.user', 'facilities', 'rooms']);
-        $facilities = Facility::orderBy('facility_name')->get();
+        $facilities = Facility::where('owner_id', $this->currentOwner()->id)->where('facility_type', 'branch')->orderBy('facility_name')->get();
         $selectedFacilities = $branch->facilities->pluck('id')->all();
         $totalRooms = $branch->rooms->count();
         $occupiedRooms = $branch->rooms->whereIn('status', ['occupied', 'terisi'])->count();

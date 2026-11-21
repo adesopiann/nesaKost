@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\BranchDorm;
+use App\Models\Facility;
 use App\Models\Room;
 use App\Models\RoomImage;
 use App\Services\RoomAvailabilityService;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RoomController extends Controller
@@ -39,7 +41,12 @@ class RoomController extends Controller
                     $this->ownerBranches($request)->select('id')
                 );
             })
-            ->with(['branch', 'images', 'firstImage'])
+            ->with([
+                'branch',
+                'images',
+                'firstImage',
+                'facilities' => fn ($query) => $query->where('facility.facility_type', 'room')->orderBy('facility_name'),
+            ])
             ->findOrFail($id);
     }
 
@@ -69,6 +76,7 @@ class RoomController extends Controller
 
         $roomsQuery = Room::query()
             ->with(['branch', 'images', 'firstImage'])
+            ->withCount(['bookings', 'rents'])
             ->whereIn('branch_dorm_id', $ownedBranchIds);
 
         if ($search !== '') {
@@ -141,7 +149,8 @@ class RoomController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('pages.owner.rooms.create', compact('branches'));
+        $facilities = Facility::whereHas('owner', fn ($q) => $q->where('user_id', $request->user()->id))->where('facility_type', 'room')->orderBy('facility_name')->get();
+        return view('pages.owner.rooms.create', compact('branches', 'facilities'));
     }
 
     /**
@@ -181,6 +190,8 @@ class RoomController extends Controller
                 'max:5120',
             ],
             'description' => ['nullable', 'string'],
+            'facilities' => ['nullable', 'array'],
+            'facilities.*' => ['integer', 'distinct', Rule::exists('facility', 'id')->where(fn ($query) => $query->where('owner_id', DB::table('owners')->where('user_id', $request->user()->id)->value('id'))->where('facility_type', 'room'))],
             'status' => [
                 'required',
                 Rule::in(['active', 'inactive', 'maintenance']),
@@ -195,9 +206,12 @@ class RoomController extends Controller
 
         $uploadedImages = $request->file('images', []);
         unset($validated['images']);
+        $facilityIds = $validated['facilities'] ?? [];
+        unset($validated['facilities']);
 
-        DB::transaction(function () use ($validated, $uploadedImages) {
+        DB::transaction(function () use ($validated, $uploadedImages, $facilityIds) {
             $room = Room::create($validated);
+            $room->facilities()->sync($facilityIds);
 
             foreach ($uploadedImages as $index => $image) {
                 $path = $image->store('rooms', 'public');
@@ -226,8 +240,13 @@ class RoomController extends Controller
     public function show(Request $request, int $room): View
     {
         $room = $this->ownedRoom($request, $room);
+        [$currentTransactions, $transactionHistory] = $this->roomDetailTransactions($room);
 
-        return view('pages.owner.rooms.show', compact('room'));
+        return view('pages.owner.rooms.show', compact(
+            'room',
+            'currentTransactions',
+            'transactionHistory'
+        ));
     }
 
     /**
@@ -241,7 +260,309 @@ class RoomController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('pages.owner.rooms.edit', compact('room', 'branches'));
+        $facilities = Facility::whereHas('owner', fn ($q) => $q->where('user_id', $request->user()->id))->where('facility_type', 'room')->orderBy('facility_name')->get();
+        $selectedFacilities = $room->facilities->pluck('id')->all();
+        return view('pages.owner.rooms.edit', compact('room', 'branches', 'facilities', 'selectedFacilities'));
+    }
+
+    /**
+     * Ambil hanya transaksi yang masih menghalangi perubahan status:
+     * booking confirmed atau pending_payment yang belum kedaluwarsa,
+     * serta rent active atau scheduled.
+     */
+    private function roomBookingAndRentDetails(Room $room): array
+    {
+        $bookings = DB::table('booking as bk')
+            ->leftJoin('tenants as t', 't.id', '=', 'bk.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->where('bk.room_id', $room->id)
+            ->whereDate('bk.end_date', '>=', today())
+            ->where(function ($query) {
+                $query->where('bk.status', 'confirmed')
+                    ->orWhere(function ($pending) {
+                        $pending->where('bk.status', 'pending_payment')
+                            ->where(function ($expiry) {
+                                $expiry->whereNull('bk.expires_at')
+                                    ->orWhere('bk.expires_at', '>', now());
+                            });
+                    });
+            })
+            ->select(
+                'bk.id',
+                'bk.booking_code as code',
+                'bk.start_date',
+                'bk.end_date',
+                'bk.status',
+                'u.fname',
+                'u.lname'
+            )
+            ->orderByDesc('bk.start_date')
+            ->get()
+            ->map(fn ($booking) => [
+                'type' => 'Booking',
+                'code' => $booking->code ?: 'BOOKING-' . $booking->id,
+                'start_date' => $booking->start_date,
+                'end_date' => $booking->end_date,
+                'status' => $booking->status,
+                'tenant_name' => trim(($booking->fname ?? '') . ' ' . ($booking->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+            ]);
+
+        $rents = DB::table('rent as rt')
+            ->leftJoin('tenants as t', 't.id', '=', 'rt.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->where('rt.room_id', $room->id)
+            ->whereIn('rt.status', ['active', 'scheduled'])
+            ->whereDate('rt.end_date', '>=', today())
+            ->select(
+                'rt.id',
+                'rt.rent_code as code',
+                'rt.start_date',
+                'rt.end_date',
+                'rt.status',
+                'u.fname',
+                'u.lname'
+            )
+            ->orderByDesc('rt.start_date')
+            ->get()
+            ->map(fn ($rent) => [
+                'type' => 'Sewa',
+                'code' => $rent->code ?: 'RENT-' . $rent->id,
+                'start_date' => $rent->start_date,
+                'end_date' => $rent->end_date,
+                'status' => $rent->status,
+                'tenant_name' => trim(($rent->fname ?? '') . ' ' . ($rent->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+            ]);
+
+        return $bookings->concat($rents)
+            ->sortByDesc('start_date')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Ambil transaksi kamar untuk halaman detail.
+     *
+     * Transaksi berjalan:
+     * - Booking pending_payment yang belum kedaluwarsa dan periodenya belum lewat.
+     * - Rent active/scheduled yang periodenya belum berakhir.
+     *
+     * Booking confirmed tidak ditampilkan terpisah jika sudah dikonversi
+     * menjadi rent, agar transaksi yang sama tidak muncul dua kali.
+     *
+     * Riwayat:
+     * - Booking expired/cancelled.
+     * - Rent completed/cancelled.
+     * - Transaksi berstatus aktif/terkonfirmasi tetapi tanggal akhirnya lewat.
+     */
+    private function roomDetailTransactions(Room $room): array
+    {
+        $latestPayment = DB::table('payment')
+            ->selectRaw('booking_id, MAX(id) as latest_payment_id')
+            ->groupBy('booking_id');
+
+        $pendingBookings = DB::table('booking as bk')
+            ->leftJoin('tenants as t', 't.id', '=', 'bk.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->leftJoinSub($latestPayment, 'latest_payment', function ($join) {
+                $join->on('latest_payment.booking_id', '=', 'bk.id');
+            })
+            ->leftJoin('payment as p', 'p.id', '=', 'latest_payment.latest_payment_id')
+            ->where('bk.room_id', $room->id)
+            ->where('bk.status', 'pending_payment')
+            ->whereDate('bk.end_date', '>=', today())
+            ->where(function ($query) {
+                $query->whereNull('bk.expires_at')
+                    ->orWhere('bk.expires_at', '>', now());
+            })
+            ->select(
+                'bk.id',
+                'bk.booking_code as code',
+                'bk.start_date',
+                'bk.end_date',
+                'bk.status',
+                'bk.expires_at',
+                'u.fname',
+                'u.lname',
+                'p.payment_code',
+                'p.status as payment_status',
+                'p.payment_method',
+                'p.amount as payment_amount'
+            )
+            ->get()
+            ->map(fn ($booking) => [
+                'type' => 'Booking',
+                'code' => $booking->code ?: 'BOOKING-' . $booking->id,
+                'start_date' => $booking->start_date,
+                'end_date' => $booking->end_date,
+                'status' => $booking->status,
+                'tenant_name' => trim(($booking->fname ?? '') . ' ' . ($booking->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+                'payment_code' => $booking->payment_code,
+                'payment_status' => $booking->payment_status,
+                'payment_method' => $booking->payment_method,
+                'payment_amount' => $booking->payment_amount,
+                'expires_at' => $booking->expires_at,
+            ]);
+
+        $activeRents = DB::table('rent as rt')
+            ->join('booking as bk', 'bk.id', '=', 'rt.booking_id')
+            ->leftJoin('tenants as t', 't.id', '=', 'rt.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->leftJoinSub($latestPayment, 'latest_payment', function ($join) {
+                $join->on('latest_payment.booking_id', '=', 'bk.id');
+            })
+            ->leftJoin('payment as p', 'p.id', '=', 'latest_payment.latest_payment_id')
+            ->where('rt.room_id', $room->id)
+            ->whereIn('rt.status', ['active', 'scheduled'])
+            ->whereDate('rt.end_date', '>=', today())
+            ->select(
+                'rt.id',
+                'rt.rent_code as code',
+                'rt.start_date',
+                'rt.end_date',
+                'rt.status',
+                'bk.booking_code',
+                'u.fname',
+                'u.lname',
+                'p.payment_code',
+                'p.status as payment_status',
+                'p.payment_method',
+                'p.amount as payment_amount'
+            )
+            ->get()
+            ->map(fn ($rent) => [
+                'type' => 'Sewa',
+                'code' => $rent->code ?: 'RENT-' . $rent->id,
+                'start_date' => $rent->start_date,
+                'end_date' => $rent->end_date,
+                'status' => $rent->status,
+                'tenant_name' => trim(($rent->fname ?? '') . ' ' . ($rent->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+                'booking_code' => $rent->booking_code,
+                'payment_code' => $rent->payment_code,
+                'payment_status' => $rent->payment_status,
+                'payment_method' => $rent->payment_method,
+                'payment_amount' => $rent->payment_amount,
+                'expires_at' => null,
+            ]);
+
+        $historyBookings = DB::table('booking as bk')
+            ->leftJoin('tenants as t', 't.id', '=', 'bk.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->leftJoinSub($latestPayment, 'latest_payment', function ($join) {
+                $join->on('latest_payment.booking_id', '=', 'bk.id');
+            })
+            ->leftJoin('payment as p', 'p.id', '=', 'latest_payment.latest_payment_id')
+            ->where('bk.room_id', $room->id)
+            ->where(function ($query) {
+                $query->whereIn('bk.status', ['expired', 'cancelled'])
+                    ->orWhere(function ($pastConfirmed) {
+                        $pastConfirmed->where('bk.status', 'confirmed')
+                            ->whereDate('bk.end_date', '<', today());
+                    });
+            })
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('rent as rt')
+                    ->whereColumn('rt.booking_id', 'bk.id');
+            })
+            ->select(
+                'bk.id',
+                'bk.booking_code as code',
+                'bk.start_date',
+                'bk.end_date',
+                'bk.status',
+                'u.fname',
+                'u.lname',
+                'p.payment_code',
+                'p.status as payment_status',
+                'p.payment_method',
+                'p.amount as payment_amount'
+            )
+            ->get()
+            ->map(fn ($booking) => [
+                'type' => 'Booking',
+                'code' => $booking->code ?: 'BOOKING-' . $booking->id,
+                'start_date' => $booking->start_date,
+                'end_date' => $booking->end_date,
+                'status' => $booking->status,
+                'tenant_name' => trim(($booking->fname ?? '') . ' ' . ($booking->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+                'payment_code' => $booking->payment_code,
+                'payment_status' => $booking->payment_status,
+                'payment_method' => $booking->payment_method,
+                'payment_amount' => $booking->payment_amount,
+                'expires_at' => null,
+            ]);
+
+        $historyRents = DB::table('rent as rt')
+            ->leftJoin('booking as bk', 'bk.id', '=', 'rt.booking_id')
+            ->leftJoin('tenants as t', 't.id', '=', 'rt.tenant_id')
+            ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+            ->leftJoinSub($latestPayment, 'latest_payment', function ($join) {
+                $join->on('latest_payment.booking_id', '=', 'bk.id');
+            })
+            ->leftJoin('payment as p', 'p.id', '=', 'latest_payment.latest_payment_id')
+            ->where('rt.room_id', $room->id)
+            ->where(function ($query) {
+                $query->whereIn('rt.status', ['completed', 'cancelled'])
+                    ->orWhereDate('rt.end_date', '<', today());
+            })
+            ->select(
+                'rt.id',
+                'rt.rent_code as code',
+                'rt.start_date',
+                'rt.end_date',
+                'rt.status',
+                'bk.booking_code',
+                'u.fname',
+                'u.lname',
+                'p.payment_code',
+                'p.status as payment_status',
+                'p.payment_method',
+                'p.amount as payment_amount'
+            )
+            ->get()
+            ->map(fn ($rent) => [
+                'type' => 'Sewa',
+                'code' => $rent->code ?: 'RENT-' . $rent->id,
+                'start_date' => $rent->start_date,
+                'end_date' => $rent->end_date,
+                'status' => $rent->status,
+                'tenant_name' => trim(($rent->fname ?? '') . ' ' . ($rent->lname ?? '')) ?: 'Nama penyewa tidak tersedia',
+                'booking_code' => $rent->booking_code,
+                'payment_code' => $rent->payment_code,
+                'payment_status' => $rent->payment_status,
+                'payment_method' => $rent->payment_method,
+                'payment_amount' => $rent->payment_amount,
+                'expires_at' => null,
+            ]);
+
+        $currentTransactions = $pendingBookings->concat($activeRents)
+            ->sortBy('start_date')
+            ->values();
+
+        $transactionHistory = $historyBookings->concat($historyRents)
+            ->sortByDesc('start_date')
+            ->values();
+
+        return [$currentTransactions, $transactionHistory];
+    }
+
+    private function statusChangeBlockedResponse(Request $request, Room $room): ?RedirectResponse
+    {
+        $transactions = $this->roomBookingAndRentDetails($room);
+
+        if (empty($transactions)) {
+            return null;
+        }
+
+        $message = 'Status kamar ' . $room->room_code
+            . ' tidak dapat diubah karena masih memiliki '
+            . count($transactions)
+            . ' data booking dan/atau penyewaan. Periksa detail transaksi berikut.';
+
+        return back()
+            ->withInput()
+            ->withErrors(['status' => $message])
+            ->with('roomStatusBlockers', $transactions);
     }
 
     /**
@@ -283,6 +604,8 @@ class RoomController extends Controller
                 'max:5120',
             ],
             'description' => ['nullable', 'string'],
+            'facilities' => ['nullable', 'array'],
+            'facilities.*' => ['integer', 'distinct', Rule::exists('facility', 'id')->where(fn ($query) => $query->where('owner_id', DB::table('owners')->where('user_id', $request->user()->id)->value('id'))->where('facility_type', 'room'))],
             'status' => [
                 'required',
                 Rule::in(['active', 'inactive', 'maintenance']),
@@ -298,20 +621,31 @@ class RoomController extends Controller
         ]);
 
         $uploadedImages = $request->file('images', []);
+        $facilityIds = $validated['facilities'] ?? [];
+
+        if ($validated['status'] !== $room->status) {
+            $blockedResponse = $this->statusChangeBlockedResponse($request, $room);
+
+            if ($blockedResponse) {
+                return $blockedResponse;
+            }
+        }
 
         $deleteImageIds = collect($validated['delete_images'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        unset($validated['images'], $validated['delete_images']);
+        unset($validated['images'], $validated['delete_images'], $validated['facilities']);
 
         DB::transaction(function () use (
             $room,
             $validated,
             $uploadedImages,
-            $deleteImageIds
+            $deleteImageIds,
+            $facilityIds
         ) {
             $room->update($validated);
+            $room->facilities()->sync($facilityIds);
 
             // Hapus gambar yang dipilih.
             if (!empty($deleteImageIds)) {
@@ -358,6 +692,52 @@ class RoomController extends Controller
         return redirect()
             ->route('owner.rooms.show', $room->id)
             ->with('success', 'Data kamar berhasil diperbarui.');
+    }
+
+    /**
+     * Ubah status operasional kamar.
+     *
+     * Kamar yang masih memiliki alokasi rent/booking saat ini atau mendatang
+     * tidak boleh dinonaktifkan/diubah ke maintenance.
+     */
+    public function updateStatus(Request $request, int $room): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['active', 'inactive', 'maintenance'])],
+        ]);
+
+        $ownedRoom = $this->ownedRoom($request, $room);
+        $newStatus = $validated['status'];
+
+        if ($newStatus === $ownedRoom->status) {
+            return back()->with('success', 'Status kamar tidak mengalami perubahan.');
+        }
+
+        $blockedResponse = $this->statusChangeBlockedResponse($request, $ownedRoom);
+
+        if ($blockedResponse) {
+            return $blockedResponse;
+        }
+
+        DB::transaction(function () use ($ownedRoom, $newStatus) {
+            $lockedRoom = Room::query()
+                ->whereKey($ownedRoom->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedRoom->update(['status' => $newStatus]);
+        });
+
+        $statusLabels = [
+            'active' => 'Aktif',
+            'inactive' => 'Nonaktif',
+            'maintenance' => 'Perawatan',
+        ];
+
+        return back()->with(
+            'success',
+            'Status kamar berhasil diubah menjadi ' . $statusLabels[$newStatus] . '.'
+        );
     }
 
     /**

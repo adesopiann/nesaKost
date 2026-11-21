@@ -39,17 +39,25 @@
                     <p class="text-sm font-semibold text-slate-500">Kategori kost</p>
                     <p class="mt-2 font-medium capitalize">{{ $branch->gender_type ?: 'Belum ditentukan' }}</p>
             </div>
-             <div>
-                    <p class="text-sm font-semibold text-slate-500">Koordinat lokasi</p>
+             <div class="space-y-3">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500">Titik lokasi cabang</p>
                     @if ($branch->latitude !== null && $branch->longitude !== null)
-                        <p class="mt-2 text-sm">{{ $branch->latitude }}, {{ $branch->longitude }}</p>
-                        <a class="mt-2 inline-flex text-sm font-semibold text-blue-800 hover:underline"
-                            href="https://www.openstreetmap.org/?mlat={{ $branch->latitude }}&mlon={{ $branch->longitude }}#map=18/{{ $branch->latitude }}/{{ $branch->longitude }}"
-                            target="_blank" rel="noopener noreferrer">Lihat titik di OpenStreetMap ↗</a>
-                    @else
-                        <p class="mt-2 text-sm text-amber-600">Lokasi belum ditentukan. Lengkapi melalui menu Edit Cabang.
-                        </p>
+                        <p class="mt-1 text-sm text-slate-600">{{ $branch->latitude }}, {{ $branch->longitude }}</p>
                     @endif
+                </div>
+                @if ($branch->latitude !== null && $branch->longitude !== null)
+                    <div id="branch-detail-map"
+                        class="z-0 h-[320px] w-full rounded-xl border border-slate-200"
+                        data-lat="{{ $branch->latitude }}"
+                        data-lng="{{ $branch->longitude }}"
+                        aria-label="Peta lokasi cabang {{ $branch->name }}"></div>
+                    <a class="inline-flex text-sm font-semibold text-blue-800 hover:underline"
+                        href="https://www.openstreetmap.org/?mlat={{ $branch->latitude }}&mlon={{ $branch->longitude }}#map=18/{{ $branch->latitude }}/{{ $branch->longitude }}"
+                        target="_blank" rel="noopener noreferrer">Buka di OpenStreetMap ↗</a>
+                @else
+                    <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-700">Lokasi belum ditentukan. Lengkapi melalui menu Edit Cabang.</p>
+                @endif
             </div>
             <div>
                 <p class="text-sm font-semibold text-slate-500">Pemilik properti</p>
@@ -80,5 +88,48 @@
         </aside>
     </section>
 </div>
+
+@if ($branch->latitude !== null && $branch->longitude !== null)
+    @once
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    @endonce
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mapElement = document.getElementById('branch-detail-map');
+            if (!mapElement || mapElement.dataset.initialized === '1') return;
+            mapElement.dataset.initialized = '1';
+
+            const latitude = Number(mapElement.dataset.lat);
+            const longitude = Number(mapElement.dataset.lng);
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                mapElement.textContent = 'Koordinat lokasi tidak valid.';
+                return;
+            }
+
+            if (typeof L === 'undefined') {
+                mapElement.textContent = 'Peta gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
+                return;
+            }
+
+            const map = L.map(mapElement, {
+                scrollWheelZoom: false,
+                dragging: true,
+                doubleClickZoom: true,
+                touchZoom: true,
+                keyboard: true,
+            }).setView([latitude, longitude], 17);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>'
+            }).addTo(map);
+
+            L.marker([latitude, longitude]).addTo(map)
+                .bindPopup(@json($branch->name))
+                .openPopup();
+        });
+    </script>
+@endif
 
 @endsection

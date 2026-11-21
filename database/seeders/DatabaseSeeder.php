@@ -123,22 +123,25 @@ class DatabaseSeeder extends Seeder
              * 3. FACILITIES
              */
             $facilityDefinitions = [
-                ['Wi-Fi', 'Internet nirkabel di area kost.'],
-                ['Parkir Motor', 'Area parkir motor penghuni.'],
-                ['Dapur Bersama', 'Dapur bersama untuk penghuni.'],
-                ['Laundry', 'Area mencuci dan menjemur pakaian.'],
-                ['Keamanan 24 Jam', 'Keamanan dan pemantauan selama 24 jam.'],
-                ['Kamar Mandi Dalam', 'Kamar mandi pribadi di dalam kamar.'],
-                ['AC', 'Pendingin udara di dalam kamar.'],
-                ['Kasur', 'Kasur dan tempat tidur.'],
-                ['Lemari', 'Lemari pakaian.'],
-                ['Meja Belajar', 'Meja untuk belajar atau bekerja.'],
+                ['Wi-Fi', 'Internet nirkabel di area kost.', 'branch'],
+                ['Parkir Motor', 'Area parkir motor penghuni.', 'branch'],
+                ['Dapur Bersama', 'Dapur bersama untuk penghuni.', 'branch'],
+                ['Laundry', 'Area mencuci dan menjemur pakaian.', 'branch'],
+                ['Keamanan 24 Jam', 'Keamanan dan pemantauan selama 24 jam.', 'branch'],
+                ['Wi-Fi', 'Internet nirkabel yang tersedia di kamar.', 'room'],
+                ['Kamar Mandi Dalam', 'Kamar mandi pribadi di dalam kamar.', 'room'],
+                ['AC', 'Pendingin udara di dalam kamar.', 'room'],
+                ['Kasur', 'Kasur dan tempat tidur.', 'room'],
+                ['Lemari', 'Lemari pakaian.', 'room'],
+                ['Meja Belajar', 'Meja untuk belajar atau bekerja.', 'room'],
             ];
 
-            $facilityIds = [];
-            foreach ($facilityDefinitions as [$name, $description]) {
-                $facilityIds[$name] = DB::table('facility')->insertGetId([
+            $facilityIds = ['branch' => [], 'room' => []];
+            foreach ($facilityDefinitions as [$name, $description, $facilityType]) {
+                $facilityIds[$facilityType][$name] = DB::table('facility')->insertGetId([
+                    'owner_id' => $ownerId,
                     'facility_name' => $name,
+                    'facility_type' => $facilityType,
                     'description' => $description,
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -204,7 +207,7 @@ class DatabaseSeeder extends Seeder
                 foreach ($definition['facilities'] as $facilityName) {
                     DB::table('branch_facility')->insert([
                         'branch_dorm_id' => $branchId,
-                        'facility_id' => $facilityIds[$facilityName],
+                        'facility_id' => $facilityIds['branch'][$facilityName],
                     ]);
                 }
 
@@ -286,7 +289,7 @@ class DatabaseSeeder extends Seeder
                 foreach (array_unique($roomFacilityNames) as $facilityName) {
                     DB::table('room_facility')->insert([
                         'room_id' => $roomId,
-                        'facility_id' => $facilityIds[$facilityName],
+                        'facility_id' => $facilityIds['room'][$facilityName],
                     ]);
                 }
             }
