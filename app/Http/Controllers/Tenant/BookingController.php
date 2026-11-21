@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Room;
 use App\Services\RoomAvailabilityService;
 use App\Services\TenantRentalPeriodGuard;
+use App\Services\OwnerNotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -129,6 +130,8 @@ class BookingController extends Controller
             return $booking;
         });
 
+        app(OwnerNotificationService::class)->bookingCreated($booking);
+
         return redirect()
             ->route('tenant.bookings.show', $booking->id)
             ->with('success', 'Booking berhasil dibuat. Silakan lanjutkan pembayaran.');
@@ -190,6 +193,11 @@ class BookingController extends Controller
 
             return 'cancelled';
         });
+
+        if ($result === 'cancelled') {
+            $cancelledBooking = Booking::with(['room.branchDorm', 'tenant.user'])->find($id);
+            if ($cancelledBooking) app(OwnerNotificationService::class)->bookingCancelled($cancelledBooking);
+        }
 
         return match ($result) {
             'cancelled' => redirect()

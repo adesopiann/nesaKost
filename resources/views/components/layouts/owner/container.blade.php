@@ -15,11 +15,13 @@
     @include('components.layouts.owner.sidebar')
     @include('components.layouts.owner.navbar')
 
-    <main id="main-content" class="min-h-screen pt-[88px] pl-0 transition-all duration-300 lg:pl-[260px]">
+    <main id="main-content" class="min-h-screen pt-[52px] pl-0 transition-all duration-300 lg:pl-[260px]">
         <div class="px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             @yield('main')
         </div>
     </main>
+
+    @include('components.owner.confirm-modal')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -57,66 +59,6 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const logoutButton = document.getElementById('logout-button');
-            const logoutModal = document.getElementById('logout-modal');
-            const modalContent = document.getElementById('logout-modal-content');
-            const cancelButton = document.getElementById('cancel-logout');
-            const confirmButton = document.getElementById('confirm-logout');
-            const logoutForm = document.getElementById('logout-form');
-
-            if (!logoutButton || !logoutModal || !logoutForm) return;
-
-            // Membuka modal
-            function openModal() {
-                logoutModal.classList.remove('hidden');
-                logoutModal.classList.add('flex');
-
-                requestAnimationFrame(() => {
-                    modalContent.classList.remove('scale-95', 'opacity-0');
-                    modalContent.classList.add('scale-100', 'opacity-100');
-                });
-            }
-
-            // Menutup modal
-            function closeModal() {
-                modalContent.classList.remove('scale-100', 'opacity-100');
-                modalContent.classList.add('scale-95', 'opacity-0');
-
-                setTimeout(() => {
-                    logoutModal.classList.remove('flex');
-                    logoutModal.classList.add('hidden');
-                }, 200);
-            }
-
-            // Event tombol logout
-            logoutButton.addEventListener('click', openModal);
-
-            // Event tombol batal
-            cancelButton.addEventListener('click', closeModal);
-
-            // Klik area luar modal
-            logoutModal.addEventListener('click', function(event) {
-                if (event.target === logoutModal) {
-                    closeModal();
-                }
-            });
-
-            // Tekan Escape
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && !logoutModal.classList.contains('hidden')) {
-                    closeModal();
-                }
-            });
-
-            // Konfirmasi logout
-            confirmButton.addEventListener('click', function() {
-                confirmButton.disabled = true;
-                confirmButton.textContent = 'Memproses...';
-
-                logoutForm.submit();
-            });
-        });     
     </script>
 
     @stack('scripts')

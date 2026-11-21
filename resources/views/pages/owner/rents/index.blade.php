@@ -35,10 +35,11 @@
     @endphp
     <div class="space-y-6">
         <section
-            class="flex flex-col gap-3 rounded-xl border border-slate-100 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+            class="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900">Data Sewa</h1>
-                <p class="mt-1 text-sm text-slate-500">Pantau seluruh kontrak sewa dari cabang yang kamu kelola.</p>
+                <h1 class="text-2xl font-bold">Data Sewa</h1>
+                <p class="mt-1 max-w-2xl text-sm text-slate-500">Pantau seluruh kontrak sewa dari cabang yang kamu kelola.
+                </p>
             </div>
         </section>
 
@@ -82,7 +83,8 @@
                 <div class="flex gap-2"><input type="search" name="q" value="{{ $search }}"
                         placeholder="Cari kode, kamar, penyewa..."
                         class="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm"><button
-                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 text-sm font-semibold text-white">Filter</button></div>
+                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 text-sm font-semibold text-white">Filter</button>
+                </div>
             </form>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[950px] text-left text-sm">

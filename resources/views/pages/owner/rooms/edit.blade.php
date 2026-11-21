@@ -21,8 +21,9 @@
     <form method="POST" enctype="multipart/form-data" action="{{ route('owner.rooms.update', $room->id) }}"
         class="space-y-6"
         data-confirm-modal
-        data-confirm-title="Konfirmasi perubahan status kamar"
-        data-confirm-message="Kamu mengubah status kamar {{ $room->room_code }}. Perubahan status hanya boleh dilakukan jika kamar tidak memiliki booking maupun penyewaan. Lanjutkan?"
+        data-confirm-variant="primary"
+        data-confirm-title="Simpan perubahan kamar"
+        data-confirm-message="Perubahan informasi kamar {{ $room->room_code }} akan disimpan. Apakah kamu ingin melanjutkan?"
         data-confirm-accept="Ya, simpan perubahan">
         @csrf
         @method('PUT')
@@ -35,5 +36,4 @@
         </section>
     </form>
 </div>
-@include('components.owner.confirm-modal')
 @endsection

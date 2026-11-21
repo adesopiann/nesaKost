@@ -9,6 +9,7 @@ use App\Models\Rent;
 use App\Models\Room;
 use App\Services\RoomAvailabilityService;
 use App\Services\TenantRentalPeriodGuard;
+use App\Services\OwnerNotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -144,6 +145,8 @@ class RenewalController extends Controller
         } catch (ValidationException $exception) {
             throw $exception;
         }
+
+        app(OwnerNotificationService::class)->bookingCreated($booking);
 
         return redirect()
             ->route('tenant.bookings.show', $booking->id)

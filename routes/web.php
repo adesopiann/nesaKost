@@ -8,6 +8,7 @@ use App\Http\Controllers\Owner\TransactionController;
 use App\Http\Controllers\Owner\HousemaidController;
 use App\Http\Controllers\Owner\TenantController;
 use App\Http\Controllers\Owner\FacilityController;
+use App\Http\Controllers\Owner\NotificationController as OwnerNotificationController;
 
 use App\Http\Controllers\Guest\HomeController;
 use App\Http\Controllers\Guest\PropertyController;
@@ -84,6 +85,11 @@ Route::middleware('auth')->group(function () {
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/notifications', [OwnerNotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/{notificationId}/open', [OwnerNotificationController::class, 'open'])->name('notifications.open');
+        Route::patch('/notifications/{notificationId}/read', [OwnerNotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::patch('/notifications/read-all', [OwnerNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
         
         Route::get('/branches/geocode', [BranchDormController::class, 'geocode'])
             ->middleware('throttle:5,1')

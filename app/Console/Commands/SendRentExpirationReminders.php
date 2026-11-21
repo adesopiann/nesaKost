@@ -6,6 +6,7 @@ use App\Mail\RentExpirationReminderMail;
 use App\Models\Rent;
 use App\Models\RentExpirationReminderEmail;
 use App\Notifications\RentExpirationNotification;
+use App\Services\OwnerNotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
@@ -105,6 +106,7 @@ class SendRentExpirationReminders extends Command
                                 ]);
 
                                 $user->notify(new RentExpirationNotification($rent, $reminderType));
+                                app(OwnerNotificationService::class)->rentExpiration($rent, $reminderType);
 
                                 return true;
                             });

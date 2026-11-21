@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Services\OwnerNotificationService;
 
 class PaymentController extends Controller
 {
@@ -212,6 +213,15 @@ class PaymentController extends Controller
 
             return 'success';
         });
+
+        if ($result === 'success') {
+            $paidBooking = Booking::with(['room.branchDorm.owner.user', 'tenant.user', 'payments'])->find($bookingId);
+            if ($paidBooking) {
+                $paidPayment = $paidBooking->payments->firstWhere('id', $paymentId);
+                app(OwnerNotificationService::class)->paymentPaid($paidBooking, $paymentId);
+                if ($paidBooking->rent) app(OwnerNotificationService::class)->rentCreated($paidBooking->rent);
+            }
+        }
 
         if ($result === 'success' || $result === 'already_paid') {
             $bookingType = Booking::whereKey($bookingId)->value('booking_type');

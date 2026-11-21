@@ -9,9 +9,13 @@
             <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ session('error') }}
             </div>
         @endif
-        <section class="rounded-xl bg-white p-6 shadow-sm">
-            <h1 class="text-2xl font-bold">Data Fasilitas</h1>
-            <p class="mt-1 text-sm text-slate-500">Kelola fasilitas cabang dan fasilitas kamar secara terpisah.</p>
+        <section
+            class="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Data Fasilitas</h1>
+                <p class="mt-1 max-w-2xl text-sm text-slate-500">Kelola fasilitas cabang dan fasilitas kamar secara terpisah.
+                </p>
+            </div>
         </section>
         @if ($errors->any())
             <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -54,7 +58,8 @@
                         <option value="room" @selected(request('type') === 'room')>Fasilitas Kamar</option>
                     </select><input name="q" value="{{ $search }}" placeholder="Cari fasilitas..."
                         class="rounded-lg border border-slate-200 px-3 py-2 text-sm"><button
-                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 py-2 text-sm font-semibold text-white">Cari</button></form>
+                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 py-2 text-sm font-semibold text-white">Cari</button>
+                </form>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[720px] text-left text-sm">
@@ -105,7 +110,11 @@
                                             </div>
                                         </details>
                                         <form method="POST" action="{{ route('owner.facilities.destroy', $facility) }}"
-                                            onsubmit="return confirm('Hapus fasilitas ini beserta seluruh relasinya dari cabang dan kamar? Data cabang dan kamar tidak akan dihapus.')">
+                                            data-confirm-modal
+                                            data-confirm-variant="danger"
+                                            data-confirm-title="Hapus fasilitas"
+                                            data-confirm-message="Fasilitas {{ $facility->facility_name }} akan dihapus dari seluruh relasi cabang dan kamar. Data cabang dan kamar tidak akan dihapus. Lanjutkan?"
+                                            data-confirm-accept="Ya, hapus fasilitas">
                                             @csrf @method('DELETE')<button
                                                 class="rounded-md bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">Hapus</button>
                                         </form>

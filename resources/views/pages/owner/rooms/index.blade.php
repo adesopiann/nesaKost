@@ -12,8 +12,9 @@
                     seluruh cabang yang kamu miliki.</p>
             </div>
             <a href="{{ route('owner.rooms.create') }}"
-                class="inline-flex items-center justify-center rounded-lg bg-blue-900 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"><span
-                    class="mr-2 text-lg">+</span> Tambah Kamar</a>
+                class="inline-flex items-center justify-center rounded-lg bg-blue-900 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800">
+                + Tambah Kamar
+            </a>
         </section>
 
         <section class="grid gap-4 md:grid-cols-3">
@@ -149,14 +150,14 @@
                                             Detail
                                         </a>
 
-                                        <details class="relative text-left">
+                                        <details data-room-action-dropdown class="relative text-left">
                                             <summary
                                                 class="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                                 Lainnya
                                                 <i data-feather="chevron-down" class="h-3.5 w-3.5"></i>
                                             </summary>
-                                            <div
-                                                class="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-lg">
+                                            <div data-dropdown-menu
+                                                class="hidden w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl">
                                                 <a href="{{ route('owner.rooms.edit', $room->id) }}"
                                                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                                     <i data-feather="edit-2" class="h-4 w-4"></i>
@@ -240,5 +241,130 @@
             </div>
         </section>
     </div>
-    @include('components.owner.confirm-modal')
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('details[data-room-action-dropdown]');
+
+            function restoreMenu(dropdown) {
+                const menu = dropdown._portalMenu;
+                const placeholder = dropdown._portalPlaceholder;
+
+                if (!menu || !placeholder) return;
+
+                menu.classList.remove('fixed');
+                menu.style.removeProperty('top');
+                menu.style.removeProperty('left');
+                menu.style.removeProperty('right');
+                menu.style.removeProperty('z-index');
+                menu.classList.add('hidden');
+
+                placeholder.parentNode.insertBefore(menu, placeholder);
+                placeholder.remove();
+
+                dropdown._portalMenu = null;
+                dropdown._portalPlaceholder = null;
+            }
+
+            function positionMenu(dropdown) {
+                const summary = dropdown.querySelector('summary');
+                const menu = dropdown._portalMenu;
+                if (!summary || !menu || !dropdown.open) return;
+
+                const rect = summary.getBoundingClientRect();
+                const menuRect = menu.getBoundingClientRect();
+                const gap = 8;
+                const viewportPadding = 12;
+
+                let top = rect.bottom + gap;
+                if (top + menuRect.height > window.innerHeight - viewportPadding) {
+                    top = rect.top - menuRect.height - gap;
+                }
+                top = Math.max(
+                    viewportPadding,
+                    Math.min(top, window.innerHeight - menuRect.height - viewportPadding)
+                );
+
+                let left = rect.right - menuRect.width;
+                left = Math.max(
+                    viewportPadding,
+                    Math.min(left, window.innerWidth - menuRect.width - viewportPadding)
+                );
+
+                menu.style.top = top + 'px';
+                menu.style.left = left + 'px';
+                menu.style.right = 'auto';
+            }
+
+            function portalMenu(dropdown) {
+                const menu = dropdown.querySelector('[data-dropdown-menu]');
+                if (!menu || dropdown._portalMenu) return;
+
+                const placeholder = document.createComment('room-dropdown-menu');
+                menu.parentNode.insertBefore(placeholder, menu);
+
+                dropdown._portalMenu = menu;
+                dropdown._portalPlaceholder = placeholder;
+
+                menu.classList.remove('hidden');
+                menu.classList.add('fixed');
+                menu.style.position = 'fixed';
+                menu.style.zIndex = '9999';
+                document.body.appendChild(menu);
+
+                positionMenu(dropdown);
+            }
+
+            dropdowns.forEach(function(dropdown) {
+                dropdown.addEventListener('toggle', function() {
+                    if (dropdown.open) {
+                        // Tutup dropdown kamar lain agar hanya satu menu yang terbuka.
+                        dropdowns.forEach(function(otherDropdown) {
+                            if (otherDropdown !== dropdown && otherDropdown.open) {
+                                otherDropdown.open = false;
+                                restoreMenu(otherDropdown);
+                            }
+                        });
+                        portalMenu(dropdown);
+                    } else {
+                        restoreMenu(dropdown);
+                    }
+                });
+            });
+
+            // Klik di luar tombol dan menu akan menutup dropdown.
+            document.addEventListener('click', function(event) {
+                dropdowns.forEach(function(dropdown) {
+                    const menu = dropdown._portalMenu;
+                    const clickedTrigger = dropdown.contains(event.target);
+                    const clickedMenu = menu && menu.contains(event.target);
+
+                    if (!clickedTrigger && !clickedMenu) {
+                        dropdown.open = false;
+                        restoreMenu(dropdown);
+                    }
+                });
+            });
+
+            // Escape menutup semua dropdown yang sedang terbuka.
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    dropdowns.forEach(function(dropdown) {
+                        dropdown.open = false;
+                        restoreMenu(dropdown);
+                    });
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                dropdowns.forEach(positionMenu);
+            });
+
+            window.addEventListener('scroll', function() {
+                dropdowns.forEach(positionMenu);
+            }, true);
+        });
+    </script>
+
 @endsection
