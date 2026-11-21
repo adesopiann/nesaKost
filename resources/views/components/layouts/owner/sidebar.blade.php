@@ -14,14 +14,12 @@
         ['label' => 'Data Fasilitas', 'url' => '/owner/fasilitas', 'match' => 'owner/fasilitas*', 'icon' => 'wifi'],
         [
             'label' => 'Data Asisten Rumah Tangga',
-            'url' => '/owner/asisten-rumah-tangga',
-            'match' => 'owner/asisten-rumah-tangga*',
+            'url' => '/owner/housemaids',
+            'match' => 'owner/housemaids*',
             'icon' => 'briefcase',
         ],
     ];
-@endphp
-
-{{-- Overlay khusus tampilan mobile --}}
+@endphp--------------------------------------------------------------------------------- Overlay khusus tampilan mobile --}}
 <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/40 lg:hidden"></div>
 
 <aside id="owner-sidebar"

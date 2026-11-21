@@ -1,8 +1,8 @@
 @extends('components.layouts.owner.container')
 @section('main')
-    
+
     @include('components.owner.room-status-blockers')
-<div class="space-y-6 text-slate-800">
+    <div class="space-y-6 text-slate-800">
         @include('pages.owner.rooms.partials.flash')
         <section
             class="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
@@ -54,8 +54,9 @@
                             class="rounded-lg bg-slate-100 px-4 py-3 text-center text-sm">Reset</a>
                     @endif
                 </form>
-                <a href="{{ route('owner.rooms.index') }}" title="Muat ulang"
-                    aria-label="Muat ulang" class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100"><i data-feather="refresh-cw" class="h-4 w-4"></i></a>
+                <a href="{{ route('owner.rooms.index') }}" title="Muat ulang" aria-label="Muat ulang"
+                    class="self-end rounded-lg p-2 text-slate-500 hover:bg-slate-100"><i data-feather="refresh-cw"
+                        class="h-4 w-4"></i></a>
             </div>
 
             <div class="overflow-x-auto">
@@ -110,7 +111,8 @@
                                                 alt="Foto {{ $room->room_code }}"
                                                 class="h-11 w-11 rounded-lg object-cover">
                                         @else
-                                            <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                                            <div
+                                                class="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
                                                 <i data-feather="image" class="h-4 w-4"></i>
                                             </div>
                                         @endif
@@ -129,12 +131,14 @@
                                     Rp {{ number_format((float) $room->monthly_price, 0, ',', '.') }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $operationalClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $operationalClasses[$room->status] ?? 'bg-slate-100 text-slate-600' }}">
                                         {{ $operationalLabels[$room->status] ?? ucfirst($room->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $availabilityClasses[$availabilityStatus] ?? 'bg-slate-100 text-slate-600' }}">
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $availabilityClasses[$availabilityStatus] ?? 'bg-slate-100 text-slate-600' }}">
                                         {{ $availabilityLabels[$availabilityStatus] ?? ucfirst($availabilityStatus) }}
                                     </span>
                                 </td>
@@ -146,11 +150,13 @@
                                         </a>
 
                                         <details class="relative text-left">
-                                            <summary class="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                            <summary
+                                                class="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                                 Lainnya
                                                 <i data-feather="chevron-down" class="h-3.5 w-3.5"></i>
                                             </summary>
-                                            <div class="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-lg">
+                                            <div
+                                                class="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-lg">
                                                 <a href="{{ route('owner.rooms.edit', $room->id) }}"
                                                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                                     <i data-feather="edit-2" class="h-4 w-4"></i>
@@ -158,24 +164,27 @@
                                                 </a>
 
                                                 <div class="my-1 border-t border-slate-100"></div>
-                                                <p class="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                                                <p
+                                                    class="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                                                     Ubah status
                                                 </p>
 
                                                 @foreach ([
-                                                    'active' => 'Aktifkan kamar',
-                                                    'inactive' => 'Nonaktifkan kamar',
-                                                    'maintenance' => 'Tandai perawatan',
-                                                ] as $statusValue => $statusLabel)
+            'active' => 'Aktifkan kamar',
+            'inactive' => 'Nonaktifkan kamar',
+            'maintenance' => 'Tandai perawatan',
+        ] as $statusValue => $statusLabel)
                                                     @if ($room->status !== $statusValue)
-                                                        <form method="POST" action="{{ route('owner.rooms.update-status', $room->id) }}"
+                                                        <form method="POST"
+                                                            action="{{ route('owner.rooms.update-status', $room->id) }}"
                                                             data-confirm-modal
                                                             data-confirm-title="Konfirmasi perubahan status"
                                                             data-confirm-message="Kamu akan mengubah status kamar {{ $room->room_code }} menjadi {{ strtolower($statusLabel) }}. Pastikan kamar tidak memiliki booking maupun penyewaan. Lanjutkan?"
                                                             data-confirm-accept="Ya, ubah status">
                                                             @csrf
                                                             @method('PATCH')
-                                                            <input type="hidden" name="status" value="{{ $statusValue }}">
+                                                            <input type="hidden" name="status"
+                                                                value="{{ $statusValue }}">
                                                             <button type="submit"
                                                                 class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
                                                                 <i data-feather="power" class="h-4 w-4"></i>
@@ -187,9 +196,9 @@
 
                                                 <div class="my-1 border-t border-slate-100"></div>
                                                 @if (!$hasHistory)
-                                                    <form method="POST" action="{{ route('owner.rooms.destroy', $room->id) }}"
-                                                        data-confirm-modal
-                                                        data-confirm-title="Hapus kamar"
+                                                    <form method="POST"
+                                                        action="{{ route('owner.rooms.destroy', $room->id) }}"
+                                                        data-confirm-modal data-confirm-title="Hapus kamar"
                                                         data-confirm-message="Kamar {{ $room->room_code }} akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
                                                         data-confirm-accept="Ya, hapus kamar">
                                                         @csrf
@@ -231,5 +240,5 @@
             </div>
         </section>
     </div>
-@include('components.owner.confirm-modal')
+    @include('components.owner.confirm-modal')
 @endsection

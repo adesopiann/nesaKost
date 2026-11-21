@@ -21,4 +21,9 @@ class Owner extends Model
     {
         return $this->hasMany(BranchDorm::class, 'owner_id');
     }
+
+    public function housemaids(): HasMany
+    {
+        return $this->hasMany(Housemaid::class, 'owner_id');
+    }
 }

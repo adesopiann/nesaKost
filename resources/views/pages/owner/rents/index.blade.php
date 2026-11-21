@@ -40,9 +40,6 @@
                 <h1 class="text-2xl font-bold text-slate-900">Data Sewa</h1>
                 <p class="mt-1 text-sm text-slate-500">Pantau seluruh kontrak sewa dari cabang yang kamu kelola.</p>
             </div>
-            <a href="{{ route('owner.dashboard', array_filter(['branch_id' => $branchId])) }}"
-                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i
-                    data-feather="arrow-left" class="h-4 w-4"></i> Kembali ke Dashboard</a>
         </section>
 
         <section class="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -85,12 +82,8 @@
                 <div class="flex gap-2"><input type="search" name="q" value="{{ $search }}"
                         placeholder="Cari kode, kamar, penyewa..."
                         class="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm"><button
-                        class="rounded-lg bg-[#1D4E80] px-4 text-sm font-semibold text-white">Filter</button></div>
+                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 text-sm font-semibold text-white">Filter</button></div>
             </form>
-            <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="font-semibold text-slate-800">Daftar Kontrak Sewa</h2>
-                <p class="text-xs text-slate-500">Dibuat pada {{ $month !== null ? $monthNames[$month] : "semua bulan" }}{{ $year !== null ? " " . $year : " · semua tahun" }}</p>
-            </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[950px] text-left text-sm">
                     <thead class="bg-indigo-50 text-[11px] uppercase tracking-wide text-slate-600">

@@ -41,16 +41,15 @@
                 <p class="mt-1 text-sm text-slate-500">Pantau transaksi pembayaran dari seluruh cabang. Owner memiliki akses
                     pemantauan, bukan konfirmasi manual.</p>
             </div>
-            <a href="{{ route('owner.dashboard', array_filter(['branch_id' => $branchId])) }}"
-                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i
-                    data-feather="arrow-left" class="h-4 w-4"></i> Kembali ke Dashboard</a>
         </section>
 
         <section class="grid gap-3 sm:grid-cols-2">
             <article class="rounded-xl border border-slate-100 bg-white p-5">
                 <p class="text-sm text-slate-500">Pendapatan Diterima</p>
                 <p class="mt-2 text-2xl font-bold text-[#1D4E80]">{{ $money($summary['amount']) }}</p>
-                <p class="mt-1 text-xs text-slate-500">Hanya transaksi paid yang memiliki tanggal penerimaan{{ $month !== null ? " pada " . $monthNames[$month] : "" }}{{ $year !== null ? " " . $year : "" }}.</p>
+                <p class="mt-1 text-xs text-slate-500">Hanya transaksi paid yang memiliki tanggal
+                    penerimaan{{ $month !== null ? ' pada ' . $monthNames[$month] : '' }}{{ $year !== null ? ' ' . $year : '' }}.
+                </p>
             </article>
             <article class="rounded-xl border border-slate-100 bg-white p-5">
                 <p class="text-sm text-slate-500">Jumlah Pembayaran Berhasil</p>
@@ -98,13 +97,8 @@
                 <div class="flex gap-2"><input type="search" name="q" value="{{ $search }}"
                         placeholder="Cari kode, penyewa, kamar..."
                         class="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm"><button
-                        class="rounded-lg bg-[#1D4E80] px-4 text-sm font-semibold text-white">Filter</button></div>
+                        class="rounded-lg bg-blue-900 hover:bg-blue-800 px-4 text-sm font-semibold text-white">Filter</button></div>
             </form>
-            <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="font-semibold text-slate-800">Daftar Transaksi</h2>
-                <p class="text-xs text-slate-500">Transaksi sukses berdasarkan tanggal diterima; transaksi lain berdasarkan
-                    tanggal dibuat.</p>
-            </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[1050px] text-left text-sm">
                     <thead class="bg-indigo-50 text-[11px] uppercase tracking-wide text-slate-600">

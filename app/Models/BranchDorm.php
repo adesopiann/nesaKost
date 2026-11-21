@@ -42,6 +42,11 @@ class BranchDorm extends Model
         return $this->hasMany(Room::class, 'branch_dorm_id');
     }
 
+    public function housemaids(): BelongsToMany
+    {
+        return $this->belongsToMany(Housemaid::class, 'housemaid_branch', 'branch_dorm_id', 'housemaid_id');
+    }
+
     public function getBranchCodeAttribute(): string
     {
         return 'CBG-' . str_pad((string) $this->id, 3, '0', STR_PAD_LEFT);

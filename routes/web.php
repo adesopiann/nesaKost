@@ -5,6 +5,7 @@ use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\BranchDormController;
 use App\Http\Controllers\Owner\RoomController;
 use App\Http\Controllers\Owner\TransactionController;
+use App\Http\Controllers\Owner\HousemaidController;
 use App\Http\Controllers\Owner\TenantController;
 use App\Http\Controllers\Owner\FacilityController;
 
@@ -97,6 +98,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/penyewa/{tenantId}', [TenantController::class, 'show'])->whereNumber('tenantId')->name('tenants.show');
 
         Route::resource('rooms', RoomController::class)->names('rooms');
+
+        Route::patch('/housemaids/{housemaid}/status', [HousemaidController::class, 'updateStatus'])
+            ->whereNumber('housemaid')
+            ->name('housemaids.status');
+        Route::resource('housemaids', HousemaidController::class)->parameters(['housemaids' => 'housemaid'])->names('housemaids');
         Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])
             ->whereNumber('room')
             ->name('rooms.update-status');
