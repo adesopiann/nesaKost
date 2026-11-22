@@ -1,6 +1,6 @@
 @props(['property'])
 
-<div class="group overflow-hidden rounded-xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+<div data-motion-item data-motion-hover class="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow duration-300 hover:shadow-xl">
     <a href="{{ route('guest.properties.show', $property->id) }}">
         <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
             @if($property->image_path)

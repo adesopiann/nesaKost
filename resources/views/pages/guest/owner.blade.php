@@ -4,20 +4,20 @@
 
 @section('content')
     {{-- HERO --}}
-    <section class="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
+    <section data-page="owner-landing" class="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
         <div class="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 md:py-20 lg:grid-cols-2 lg:gap-16 lg:py-24">
-            <div class="relative z-10">
-                <span class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-blue-900">
+            <div data-owner-hero-copy class="relative z-10">
+                <span data-owner-intro class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-blue-900">
                     <i data-feather="home" class="h-4 w-4"></i>
                     Untuk pemilik kost
                 </span>
-                <h1 class="mt-6 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
+                <h1 data-owner-intro class="mt-6 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
                     Kelola properti kost dengan <span class="text-blue-900">lebih teratur.</span>
                 </h1>
-                <p class="mt-6 max-w-xl text-sm leading-7 text-slate-500 md:text-base md:leading-8">
+                <p data-owner-intro class="mt-6 max-w-xl text-sm leading-7 text-slate-500 md:text-base md:leading-8">
                     Kenalkan properti Anda kepada mahasiswa UNESA dan kelola informasi properti, kamar, booking, serta pembayaran melalui satu platform.
                 </p>
-                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div data-owner-intro class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <a href="{{ route('register.create', ['role' => 'owner']) }}"
                         class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-900 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/10 transition hover:bg-blue-800">
                         Daftar sebagai pemilik <i data-feather="arrow-right" class="h-4 w-4"></i>
@@ -33,9 +33,9 @@
             </div>
 
             {{-- Ilustrasi dashboard, dibuat dari komponen UI agar selaras dengan produk --}}
-            <div class="relative mx-auto w-full max-w-xl">
+            <div data-owner-dashboard class="relative mx-auto w-full max-w-xl">
                 <div class="absolute -inset-5 rounded-[2rem] bg-blue-100/70 blur-2xl"></div>
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-300/50 sm:p-6">
+                <div data-dashboard-float class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-300/50 sm:p-6">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <div>
                             <p class="text-xs text-slate-400">Dashboard pemilik</p>
@@ -86,16 +86,16 @@
 
     {{-- VALUE PROPOSITION --}}
     <section class="border-y border-slate-100 bg-white">
-        <div class="mx-auto grid max-w-7xl gap-8 px-6 py-12 md:grid-cols-3 md:gap-10 md:py-14">
-            <div class="flex gap-4">
+        <div data-owner-benefits class="mx-auto grid max-w-7xl gap-8 px-6 py-12 md:grid-cols-3 md:gap-10 md:py-14">
+            <div data-owner-benefit class="flex gap-4 rounded-xl p-2 transition-colors hover:bg-slate-50">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="users" class="h-5 w-5"></i></span>
                 <div><h2 class="text-sm font-semibold text-slate-900">Menjangkau mahasiswa UNESA</h2><p class="mt-2 text-sm leading-6 text-slate-500">Tampilkan informasi kost agar lebih mudah ditemukan calon penghuni di sekitar kampus.</p></div>
             </div>
-            <div class="flex gap-4">
+            <div data-owner-benefit class="flex gap-4 rounded-xl p-2 transition-colors hover:bg-slate-50">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="layers" class="h-5 w-5"></i></span>
                 <div><h2 class="text-sm font-semibold text-slate-900">Informasi lebih terpusat</h2><p class="mt-2 text-sm leading-6 text-slate-500">Kelola data properti dan kamar tanpa harus berpindah-pindah pencatatan.</p></div>
             </div>
-            <div class="flex gap-4">
+            <div data-owner-benefit class="flex gap-4 rounded-xl p-2 transition-colors hover:bg-slate-50">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="clipboard" class="h-5 w-5"></i></span>
                 <div><h2 class="text-sm font-semibold text-slate-900">Aktivitas lebih mudah dipantau</h2><p class="mt-2 text-sm leading-6 text-slate-500">Pantau booking, data penyewa, masa sewa, dan pembayaran melalui sistem.</p></div>
             </div>
@@ -105,13 +105,13 @@
     {{-- FEATURES --}}
     <section id="fitur" class="scroll-mt-24 bg-slate-50 py-16 md:py-20">
         <div class="mx-auto max-w-7xl px-6">
-            <div class="mx-auto max-w-2xl text-center">
+            <div data-owner-section-heading class="mx-auto max-w-2xl text-center">
                 <span class="text-xs font-semibold uppercase tracking-widest text-blue-900">Fitur pengelolaan</span>
                 <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">Hal penting dalam satu platform.</h2>
                 <p class="mt-4 text-sm leading-7 text-slate-500">Dari informasi properti hingga transaksi penyewaan, nesaKost membantu pemilik mengelola operasional kost dengan lebih terstruktur.</p>
             </div>
 
-            <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div data-owner-features class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @php
                     $ownerFeatures = [
                         ['icon' => 'home', 'title' => 'Manajemen properti', 'description' => 'Simpan dan kelola informasi properti kost, termasuk properti pada beberapa lokasi atau cabang.'],
@@ -123,7 +123,7 @@
                     ];
                 @endphp
                 @foreach ($ownerFeatures as $feature)
-                    <article class="rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/50">
+                    <article data-motion-hover class="rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/50">
                         <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-900"><i data-feather="{{ $feature['icon'] }}" class="h-5 w-5"></i></span>
                         <h3 class="mt-5 text-base font-semibold text-slate-900">{{ $feature['title'] }}</h3>
                         <p class="mt-2 text-sm leading-7 text-slate-500">{{ $feature['description'] }}</p>
@@ -143,7 +143,7 @@
                     <p class="mt-4 text-sm leading-7 text-slate-500">Siapkan informasi properti dan kamar agar calon penyewa mendapatkan gambaran yang jelas sebelum melakukan booking.</p>
                     <a href="{{ route('register.create', ['role' => 'owner']) }}" class="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-blue-900 hover:text-blue-700">Mulai pendaftaran <i data-feather="arrow-right" class="h-4 w-4"></i></a>
                 </div>
-                <div class="space-y-7">
+                <div data-owner-steps class="space-y-7">
                     @php
                         $ownerSteps = [
                             ['number' => '01', 'title' => 'Buat akun pemilik', 'description' => 'Daftarkan akun melalui formulir pendaftaran pemilik kost.'],
@@ -199,7 +199,7 @@
     {{-- FINAL CTA --}}
     <section class="bg-white py-16 md:py-20">
         <div class="mx-auto max-w-7xl px-6">
-            <div class="overflow-hidden rounded-2xl bg-blue-900 px-6 py-12 text-center text-white md:px-12 md:py-16">
+            <div data-owner-final-cta class="overflow-hidden rounded-2xl bg-blue-900 px-6 py-12 text-center text-white md:px-12 md:py-16">
                 <span class="text-xs font-semibold uppercase tracking-widest text-blue-200">Bergabung dengan nesaKost</span>
                 <h2 class="mx-auto mt-4 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">Siap mengelola kost dengan lebih teratur?</h2>
                 <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-blue-100">Mulai perkenalkan properti Anda kepada mahasiswa UNESA dan kelola informasi penyewaan melalui nesaKost.</p>

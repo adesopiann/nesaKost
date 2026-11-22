@@ -41,7 +41,7 @@
                 <span class="font-medium text-blue-900">Detail Kamar</span>
             </nav>
 
-            <header class="mt-5 flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:p-7">
+            <header data-motion-reveal class="mt-5 flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:p-7">
                 <div>
                     <p class="text-sm text-slate-500">{{ $branch->name }}</p>
                     <h1 class="mt-1 text-2xl font-semibold text-slate-900 md:text-3xl">
@@ -64,7 +64,7 @@
             <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
                 <main class="min-w-0 space-y-6">
                     {{-- GALERI FOTO --}}
-                    <section aria-labelledby="room-gallery-title" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+                    <section data-motion-reveal aria-labelledby="room-gallery-title" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
                         <div class="mb-4 flex items-center justify-between gap-3">
                             <h2 id="room-gallery-title" class="text-lg font-semibold text-slate-900">Foto Kamar</h2>
                             @if ($roomPhotos->isNotEmpty())
@@ -123,7 +123,7 @@
                     </section>
 
                     {{-- INFORMASI KAMAR --}}
-                    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+                    <section data-motion-reveal class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
                         <h2 class="text-lg font-semibold text-slate-900">Informasi Kamar</h2>
                         <dl class="mt-5 grid gap-5 sm:grid-cols-2">
                             <div>
@@ -154,7 +154,7 @@
                     </section>
 
                     {{-- FASILITAS KAMAR --}}
-                    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+                    <section data-motion-reveal class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
                         <h2 class="text-lg font-semibold text-slate-900">Fasilitas Kamar</h2>
                         <p class="mt-1 text-sm text-slate-500">Fasilitas yang tersedia di dalam kamar ini.</p>
                         @if ($room->facilities->isNotEmpty())
@@ -176,7 +176,7 @@
                     </section>
 
                     {{-- FASILITAS UMUM --}}
-                    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+                    <section data-motion-reveal class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
                         <h2 class="text-lg font-semibold text-slate-900">Fasilitas Umum Cabang</h2>
                         <p class="mt-1 text-sm text-slate-500">Fasilitas yang dapat digunakan oleh penghuni di area cabang kost.</p>
                         @if ($branch->facilities->isNotEmpty())
@@ -196,7 +196,7 @@
                     </section>
 
                     {{-- LOKASI CABANG --}}
-                    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+                    <section data-motion-reveal class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900">Lokasi Cabang Kost</h2>
                             <p class="mt-1 text-sm text-slate-500">Lihat lokasi cabang dan area di sekitarnya.</p>
@@ -229,7 +229,7 @@
                 </main>
 
                 {{-- SIDEBAR BOOKING --}}
-                <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
+                <aside data-motion-reveal class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
                     <p class="text-sm text-slate-500">Harga sewa per bulan</p>
                     <p class="mt-1 text-2xl font-semibold text-blue-900">
                         Rp{{ number_format((float) $room->monthly_price, 0, ',', '.') }}

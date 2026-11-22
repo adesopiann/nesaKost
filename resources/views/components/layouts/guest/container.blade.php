@@ -27,7 +27,7 @@
     @stack('styles')
 </head>
 
-<body class="bg-white text-slate-800 antialiased">
+<body class="bg-white text-slate-800 antialiased" data-guest-motion>
     @if (auth()->check() && auth()->user()->role === 'tenant')
         @include('components.layouts.tenant.navbar')
     @else

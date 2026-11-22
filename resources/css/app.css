@@ -1,12 +1,193 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source "../**/*.blade.php";
 @source "../**/*.js";
 
-
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+}
+
+/* Lenis smooth scroll (dasar dari lenis/dist/lenis.css) */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+    pointer-events: none;
+}
+
+/* Progress bar scroll (dibuat otomatis oleh animations/global-motion.js) */
+.motion-scroll-progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 9999;
+    height: 3px;
+    background: linear-gradient(90deg, #1e40af, #3b82f6);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+}
+
+/* Glow yang mengikuti cursor (dibuat oleh animations/cursor-glow.js) */
+.cursor-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 40;
+    width: 340px;
+    height: 340px;
+    border-radius: 9999px;
+    background: radial-gradient(
+        circle,
+        rgba(59, 130, 246, 0.16) 0%,
+        rgba(59, 130, 246, 0.06) 40%,
+        transparent 70%
+    );
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* Motion.dev: keep content visible when the visitor requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+    [data-motion],
+    [data-motion-item] {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* nesaKost landing-page motion details */
+.hero-grid {
+    background-image:
+        linear-gradient(rgba(30, 64, 175, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 64, 175, 0.035) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 28%,
+        black 78%,
+        transparent
+    );
+}
+
+.hero-pulse-dot {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 9999px;
+    background: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+}
+
+.hero-pulse-dot::after {
+    position: absolute;
+    inset: -4px;
+    border: 1px solid rgba(30, 64, 175, 0.35);
+    border-radius: inherit;
+    content: "";
+    animation: hero-pulse 2.2s ease-out infinite;
+}
+
+.hero-type-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 0.82em;
+    margin-left: 3px;
+    vertical-align: -0.04em;
+    border-radius: 2px;
+    background: #1e40af;
+    animation: hero-caret 0.85s steps(2, start) infinite;
+}
+
+.hero-search-card {
+    transform-origin: center;
+}
+
+.hero-card-accent {
+    position: absolute;
+    top: 0;
+    left: 12%;
+    width: 76%;
+    height: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.65),
+        transparent
+    );
+}
+
+.hero-explore [data-motion-arrow] {
+    animation: hero-arrow-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes hero-pulse {
+    0% {
+        transform: scale(0.75);
+        opacity: 0.75;
+    }
+    100% {
+        transform: scale(1.9);
+        opacity: 0;
+    }
+}
+
+@keyframes hero-caret {
+    to {
+        visibility: hidden;
+    }
+}
+
+@keyframes hero-arrow-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    [data-motion],
+    [data-motion-item],
+    [data-hero] {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+    .motion-scroll-progress,
+    .cursor-glow {
+        display: none;
+    }
 }
