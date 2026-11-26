@@ -35,14 +35,14 @@
 
     <section class="min-h-[70vh] bg-slate-50 py-8 text-slate-800 md:py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('tenant.bookings.show', $booking->id) }}"
+            <a href="{{ route('tenant.bookings.show', $booking->booking_code) }}"
                class="inline-flex items-center gap-2 text-sm font-medium text-blue-900 transition hover:text-blue-700">
                 <i data-feather="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
                 Kembali ke detail booking
             </a>
 
             <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_350px]">
-                <form action="{{ route('tenant.bookings.payments.method', $booking->id) }}" method="POST" class="min-w-0 space-y-5">
+                <form action="{{ route('tenant.bookings.payments.method', $booking->booking_code) }}" method="POST" class="min-w-0 space-y-5">
                     @csrf
 
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">

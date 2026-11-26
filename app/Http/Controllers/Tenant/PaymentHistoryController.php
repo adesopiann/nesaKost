@@ -69,13 +69,13 @@ class PaymentHistoryController extends Controller
         ));
     }
 
-    public function show(Request $request, int $paymentId)
+    public function show(Request $request, string $paymentCode)
     {
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403, 'Data tenant tidak ditemukan.');
 
         $payment = Payment::query()
-            ->whereKey($paymentId)
+            ->where('payment_code', $paymentCode)
             ->whereHas('booking', fn ($query) => $query->where('tenant_id', $tenant->id))
             ->with(['booking.room.branchDorm', 'booking.rent'])
             ->firstOrFail();

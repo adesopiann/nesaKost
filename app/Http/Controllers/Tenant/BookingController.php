@@ -133,11 +133,11 @@ class BookingController extends Controller
         app(OwnerNotificationService::class)->bookingCreated($booking);
 
         return redirect()
-            ->route('tenant.bookings.show', $booking->id)
+            ->route('tenant.bookings.show', $booking->booking_code)
             ->with('success', 'Booking berhasil dibuat. Silakan lanjutkan pembayaran.');
     }
 
-    public function cancel(Request $request, int $id)
+    public function cancel(Request $request, string $bookingCode)
     {
         $validated = $request->validate([
             'cancellation_reason' => ['nullable', 'string', 'max:1000'],
@@ -146,11 +146,12 @@ class BookingController extends Controller
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403);
 
-        $result = DB::transaction(function () use ($tenant, $id, $validated) {
+        $result = DB::transaction(function () use ($tenant, $bookingCode, $validated) {
             $booking = Booking::query()
                 ->where('tenant_id', $tenant->id)
+                ->where('booking_code', $bookingCode)
                 ->lockForUpdate()
-                ->findOrFail($id);
+                ->firstOrFail();
 
             // Booking yang sudah dibayar tidak boleh dibatalkan tenant.
             $payments = $booking->payments()
@@ -195,30 +196,30 @@ class BookingController extends Controller
         });
 
         if ($result === 'cancelled') {
-            $cancelledBooking = Booking::with(['room.branchDorm', 'tenant.user'])->find($id);
+            $cancelledBooking = Booking::with(['room.branchDorm', 'tenant.user'])->where('booking_code', $bookingCode)->first();
             if ($cancelledBooking) app(OwnerNotificationService::class)->bookingCancelled($cancelledBooking);
         }
 
         return match ($result) {
             'cancelled' => redirect()
-                ->route('tenant.bookings.show', $id)
+                ->route('tenant.bookings.show', $bookingCode)
                 ->with('success', 'Booking berhasil dibatalkan. Kamar sekarang tersedia kembali.'),
 
             'already_paid' => redirect()
-                ->route('tenant.bookings.show', $id)
+                ->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Booking yang sudah dibayar tidak dapat dibatalkan.'),
 
             'expired' => redirect()
-                ->route('tenant.bookings.show', $id)
+                ->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Masa pembayaran telah berakhir. Booking berstatus kedaluwarsa.'),
 
             default => redirect()
-                ->route('tenant.bookings.show', $id)
+                ->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Booking ini tidak dapat dibatalkan.'),
         };
     }
 
-    public function show(Request $request, int $id)
+    public function show(Request $request, string $bookingCode)
     {
         $tenant = $request->user()->tenant;
 
@@ -227,7 +228,8 @@ class BookingController extends Controller
         $booking = Booking::query()
             ->with(['room', 'payments'])
             ->where('tenant_id', $tenant->id)
-            ->findOrFail($id);
+            ->where('booking_code', $bookingCode)
+            ->firstOrFail();
 
         return view('pages.tenant.bookings.show', compact('booking'));
     }

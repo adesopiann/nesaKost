@@ -32,6 +32,11 @@ class Payment extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'payment_code';
+    }
+
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);

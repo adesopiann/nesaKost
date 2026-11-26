@@ -28,12 +28,12 @@ class PaymentController extends Controller
     ];
 
     /** Show the payment-method selection page. */
-    public function create(Request $request, int $bookingId)
+    public function create(Request $request, string $bookingCode)
     {
-        $booking = $this->ownedBooking($request, $bookingId);
+        $booking = $this->ownedBooking($request, $bookingCode);
 
         if ($this->expireBookingIfNeeded($booking)) {
-            return redirect()->route('tenant.bookings.show', $booking->id)
+            return redirect()->route('tenant.bookings.show', $booking->booking_code)
                 ->with('error', 'Batas waktu pembayaran telah berakhir. Booking sudah kedaluwarsa.');
         }
 
@@ -50,7 +50,7 @@ class PaymentController extends Controller
     }
 
     /** Save the selected channel and create/reuse a payment attempt. */
-    public function selectMethod(Request $request, int $bookingId)
+    public function selectMethod(Request $request, string $bookingCode)
     {
         $validated = $request->validate([
             'payment_method' => ['required', 'string', Rule::in(array_keys(self::PAYMENT_METHODS))],
@@ -59,11 +59,12 @@ class PaymentController extends Controller
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403);
 
-        $result = DB::transaction(function () use ($tenant, $bookingId, $validated) {
+        $result = DB::transaction(function () use ($tenant, $bookingCode, $validated) {
             $booking = Booking::query()
                 ->where('tenant_id', $tenant->id)
+                ->where('booking_code', $bookingCode)
                 ->lockForUpdate()
-                ->findOrFail($bookingId);
+                ->firstOrFail();
 
             if ($booking->status !== 'pending_payment') {
                 return ['state' => 'not_pending'];
@@ -109,38 +110,38 @@ class PaymentController extends Controller
                 'expires_at' => $booking->expires_at,
             ]);
 
-            return ['state' => 'ready', 'payment_id' => $payment->id];
+            return ['state' => 'ready', 'payment_code' => $payment->payment_code];
         });
 
         if ($result['state'] === 'expired') {
-            return redirect()->route('tenant.bookings.show', $bookingId)
+            return redirect()->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Batas waktu pembayaran telah berakhir. Booking sudah kedaluwarsa.');
         }
 
         if ($result['state'] !== 'ready') {
-            return redirect()->route('tenant.bookings.show', $bookingId)
+            return redirect()->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Booking ini tidak lagi dapat menerima pembayaran baru.');
         }
 
         return redirect()->route('tenant.bookings.payments.show', [
-            'bookingId' => $bookingId,
-            'paymentId' => $result['payment_id'],
+            'bookingCode' => $bookingCode,
+            'paymentCode' => $result['payment_code'],
         ]);
     }
 
     /** Show payment instructions for one attempt. */
-    public function show(Request $request, int $bookingId, int $paymentId)
+    public function show(Request $request, string $bookingCode, string $paymentCode)
     {
-        $booking = $this->ownedBooking($request, $bookingId);
+        $booking = $this->ownedBooking($request, $bookingCode);
 
         if ($this->expireBookingIfNeeded($booking)) {
-            return redirect()->route('tenant.bookings.show', $booking->id)
+            return redirect()->route('tenant.bookings.show', $booking->booking_code)
                 ->with('error', 'Batas waktu pembayaran telah berakhir. Booking sudah kedaluwarsa.');
         }
 
         abort_unless($booking->status === 'pending_payment', 403, 'Booking ini tidak menunggu pembayaran.');
 
-        $payment = $booking->payments()->whereKey($paymentId)->firstOrFail();
+        $payment = $booking->payments()->where('payment_code', $paymentCode)->firstOrFail();
         abort_unless($payment->status === 'pending' && $payment->payment_method, 403, 'Instruksi pembayaran ini tidak lagi aktif.');
 
         return view('pages.tenant.bookings.payment-instruction', [
@@ -151,7 +152,7 @@ class PaymentController extends Controller
     }
 
     /** Simulate the payment provider callback/result. */
-    public function simulate(Request $request, int $bookingId, int $paymentId)
+    public function simulate(Request $request, string $bookingCode, string $paymentCode)
     {
         $validated = $request->validate([
             'outcome' => ['required', Rule::in(['success', 'failed'])],
@@ -160,13 +161,14 @@ class PaymentController extends Controller
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403);
 
-        $result = DB::transaction(function () use ($tenant, $bookingId, $paymentId, $validated) {
+        $result = DB::transaction(function () use ($tenant, $bookingCode, $paymentCode, $validated) {
             $booking = Booking::query()
                 ->where('tenant_id', $tenant->id)
+                ->where('booking_code', $bookingCode)
                 ->lockForUpdate()
-                ->findOrFail($bookingId);
+                ->firstOrFail();
 
-            $payment = $booking->payments()->lockForUpdate()->findOrFail($paymentId);
+            $payment = $booking->payments()->lockForUpdate()->where('payment_code', $paymentCode)->firstOrFail();
 
             if ($payment->status === 'paid') {
                 return 'already_paid';
@@ -215,44 +217,45 @@ class PaymentController extends Controller
         });
 
         if ($result === 'success') {
-            $paidBooking = Booking::with(['room.branchDorm.owner.user', 'tenant.user', 'payments'])->find($bookingId);
+            $paidBooking = Booking::with(['room.branchDorm.owner.user', 'tenant.user', 'payments'])->where('booking_code', $bookingCode)->first();
             if ($paidBooking) {
-                $paidPayment = $paidBooking->payments->firstWhere('id', $paymentId);
-                app(OwnerNotificationService::class)->paymentPaid($paidBooking, $paymentId);
+                $paidPayment = $paidBooking->payments->firstWhere('payment_code', $paymentCode);
+                app(OwnerNotificationService::class)->paymentPaid($paidBooking, $paidPayment?->id);
                 if ($paidBooking->rent) app(OwnerNotificationService::class)->rentCreated($paidBooking->rent);
             }
         }
 
         if ($result === 'success' || $result === 'already_paid') {
-            $bookingType = Booking::whereKey($bookingId)->value('booking_type');
+            $bookingType = Booking::where('booking_code', $bookingCode)->value('booking_type');
             $message = $bookingType === 'renewal'
                 ? 'Pembayaran perpanjangan berhasil. Masa sewa baru telah dijadwalkan.'
                 : 'Simulasi pembayaran berhasil. Masa sewa telah dibuat.';
 
-            return redirect()->route('tenant.bookings.show', $bookingId)
+            return redirect()->route('tenant.bookings.show', $bookingCode)
                 ->with('success', $message);
         }
 
         if ($result === 'failed') {
-            return redirect()->route('tenant.bookings.show', $bookingId)
+            return redirect()->route('tenant.bookings.show', $bookingCode)
                 ->with('error', 'Simulasi pembayaran gagal. Kamu dapat mencoba metode lain selama booking masih berlaku.');
         }
 
-        return redirect()->route('tenant.bookings.show', $bookingId)
+        return redirect()->route('tenant.bookings.show', $bookingCode)
             ->with('error', $result === 'expired'
                 ? 'Batas waktu pembayaran telah berakhir. Booking sudah kedaluwarsa.'
                 : 'Pembayaran atau booking ini tidak lagi dapat diproses.');
     }
 
-    private function ownedBooking(Request $request, int $bookingId): Booking
+    private function ownedBooking(Request $request, string $bookingCode): Booking
     {
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403);
 
         return Booking::query()
             ->where('tenant_id', $tenant->id)
+            ->where('booking_code', $bookingCode)
             ->with('payments')
-            ->findOrFail($bookingId);
+            ->firstOrFail();
     }
 
     private function expireBookingIfNeeded(Booking $booking): bool

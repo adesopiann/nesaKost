@@ -15,7 +15,7 @@
 
     <section class="min-h-[70vh] bg-slate-50 py-8 text-slate-800 md:py-12">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('tenant.bookings.show', $booking->id) }}"
+            <a href="{{ route('tenant.bookings.show', $booking->booking_code) }}"
                class="inline-flex items-center gap-2 text-sm font-medium text-blue-900 transition hover:text-blue-700">
                 <i data-feather="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
                 Kembali ke detail booking
@@ -76,7 +76,7 @@
                                         <p class="mt-0.5 text-xs text-slate-500">Metode pembayaran yang dipilih</p>
                                     </div>
                                 </div>
-                                <a href="{{ route('tenant.bookings.payments.create', $booking->id) }}"
+                                <a href="{{ route('tenant.bookings.payments.create', $booking->booking_code) }}"
                                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-900 transition hover:text-blue-700">
                                     <i data-feather="refresh-cw" class="h-4 w-4" aria-hidden="true"></i>
                                     Ubah metode
@@ -147,7 +147,7 @@
                         </div>
 
                         <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                            <form action="{{ route('tenant.bookings.payments.simulate', ['bookingId' => $booking->id, 'paymentId' => $payment->id]) }}" method="POST">
+                            <form action="{{ route('tenant.bookings.payments.simulate', ['bookingCode' => $booking->booking_code, 'paymentCode' => $payment->payment_code]) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="outcome" value="success">
                                 <button type="submit"
@@ -157,7 +157,7 @@
                                 </button>
                             </form>
 
-                            <form action="{{ route('tenant.bookings.payments.simulate', ['bookingId' => $booking->id, 'paymentId' => $payment->id]) }}" method="POST">
+                            <form action="{{ route('tenant.bookings.payments.simulate', ['bookingCode' => $booking->booking_code, 'paymentCode' => $payment->payment_code]) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="outcome" value="failed">
                                 <button type="submit"
@@ -183,7 +183,7 @@
                         id="cancelBookingModal"
                         aria-labelledby="cancelBookingModalTitle"
                         class="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border-0 bg-white p-0 text-left shadow-2xl backdrop:bg-slate-950/60">
-                        <form action="{{ route('tenant.bookings.cancel', $booking->id) }}" method="POST" class="p-6">
+                        <form action="{{ route('tenant.bookings.cancel', $booking->booking_code) }}" method="POST" class="p-6">
                             @csrf
 
                             <div class="flex items-start gap-3">

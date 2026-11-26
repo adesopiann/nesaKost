@@ -157,52 +157,31 @@ Route::middleware('auth')->group(function () {
                 ->whereNumber('rentId')
                 ->name('rents.renewal.store');
 
-            Route::get('/bookings/{id}', [BookingController::class, 'show'])
-                ->whereNumber('id')
+            Route::get('/bookings/{bookingCode}', [BookingController::class, 'show'])
                 ->name('bookings.show');
 
-            Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])
-                ->whereNumber('id')
+            Route::post('/bookings/{bookingCode}/cancel', [BookingController::class, 'cancel'])
                 ->name('bookings.cancel');
 
-            Route::get(
-                    '/bookings/{bookingId}/payments',
-                    [PaymentController::class, 'create']
-                )
-                    ->whereNumber('bookingId')
-                    ->name('bookings.payments.create');
+            Route::get('/bookings/{bookingCode}/payments', [PaymentController::class, 'create'])
+                ->name('bookings.payments.create');
 
-            Route::post(
-                    '/bookings/{bookingId}/payments/method',
-                    [PaymentController::class, 'selectMethod']
-                )
-                    ->whereNumber('bookingId')
-                    ->name('bookings.payments.method');
+            Route::post('/bookings/{bookingCode}/payments/method', [PaymentController::class, 'selectMethod'])
+                ->name('bookings.payments.method');
 
-            Route::get(
-                    '/bookings/{bookingId}/payments/{paymentId}',
-                    [PaymentController::class, 'show']
-                )
-                    ->whereNumber('bookingId')
-                    ->whereNumber('paymentId')
-                    ->name('bookings.payments.show');
+            Route::get('/bookings/{bookingCode}/payments/{paymentCode}', [PaymentController::class, 'show'])
+                ->name('bookings.payments.show');
 
-            Route::post(
-                    '/bookings/{bookingId}/payments/{paymentId}/simulate',
-                    [PaymentController::class, 'simulate']
-                )
-                    ->whereNumber('bookingId')
-                    ->whereNumber('paymentId')
-                    ->name('bookings.payments.simulate');
-        
+            Route::post('/bookings/{bookingCode}/payments/{paymentCode}/simulate', [PaymentController::class, 'simulate'])
+                ->name('bookings.payments.simulate');
+
             Route::get('/informasi-sewa', [RentInformationController::class, 'index'])
                 ->name('informasi-sewa');
             
             Route::get('/riwayat-pembayaran', [PaymentHistoryController::class, 'index'])
                 ->name('riwayat-pembayaran');
 
-            Route::get('/riwayat-pembayaran/{paymentId}', [PaymentHistoryController::class, 'show'])
-                ->whereNumber('paymentId')
+            Route::get('/riwayat-pembayaran/{paymentCode}', [PaymentHistoryController::class, 'show'])
                 ->name('riwayat-pembayaran.show');
 
             Route::get('/profil', [ProfileController::class, 'index'])->name('profil.index');

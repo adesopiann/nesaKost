@@ -38,6 +38,11 @@ class Booking extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'booking_code';
+    }
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

@@ -61,7 +61,7 @@
                         </span>
                     </td>
                     <td class="whitespace-nowrap px-5 py-4 text-right">
-                        <a href="{{ route('tenant.riwayat-pembayaran.show', $payment->id) }}"
+                        <a href="{{ route('tenant.riwayat-pembayaran.show', $payment->payment_code) }}"
                            class="font-medium text-blue-900 hover:underline">
                             Detail <span aria-hidden="true">→</span>
                         </a>

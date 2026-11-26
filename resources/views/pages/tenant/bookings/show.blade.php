@@ -143,7 +143,7 @@
                         </div>
                     @endif
                     <div class="mt-8 space-y-3">
-                        <a href="{{ route('tenant.bookings.payments.create', $booking->id) }}"
+                        <a href="{{ route('tenant.bookings.payments.create', $booking->booking_code) }}"
                             class="block w-full rounded-lg bg-blue-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-950">
                             {{ $latestPayment && $latestPayment->status === 'pending' && $latestPayment->payment_method
                                 ? 'Lihat / Ubah Metode Pembayaran'
