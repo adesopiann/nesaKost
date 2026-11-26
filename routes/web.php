@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
+use App\Http\Controllers\Owner\BookingController as OwnerBookingController;
 use App\Http\Controllers\Owner\BranchDormController;
 use App\Http\Controllers\Owner\RoomController;
 use App\Http\Controllers\Owner\TransactionController;
@@ -112,6 +113,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])
             ->where('room', '[A-Za-z0-9-]+')
             ->name('rooms.update-status');
+
+        Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/{bookingCode}', [OwnerBookingController::class, 'show'])->where('bookingCode', '[A-Za-z0-9-]+')->name('bookings.show');
 
         Route::get('/rents', [TransactionController::class, 'rents'])->name('rents');
         Route::get('/payments', [TransactionController::class, 'payments'])->name('payments');

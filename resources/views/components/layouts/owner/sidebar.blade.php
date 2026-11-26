@@ -4,6 +4,7 @@
         ['label' => 'Data Cabang Kos', 'url' => '/owner/branches', 'match' => 'owner/branches*', 'icon' => 'home'],
         ['label' => 'Data Kamar', 'url' => '/owner/rooms', 'match' => 'owner/rooms*', 'icon' => 'columns'],
         ['label' => 'Data Penyewa', 'url' => '/owner/penyewa', 'match' => 'owner/penyewa*', 'icon' => 'users'],
+        ['label' => 'Data Booking', 'url' => '/owner/bookings', 'match' => 'owner/bookings*', 'icon' => 'calendar'],
         ['label' => 'Data Sewa', 'url' => '/owner/rents', 'match' => 'owner/rents*', 'icon' => 'clipboard'],
         [
             'label' => 'Data Pembayaran',

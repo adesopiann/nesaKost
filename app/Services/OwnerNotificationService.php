@@ -24,7 +24,7 @@ class OwnerNotificationService
             'message' => sprintf('%s mengajukan %s untuk kamar %s di cabang %s.', $this->tenantName($booking), $renewal ? 'perpanjangan sewa' : 'booking', $room?->room_code ?? '-', $branch?->name ?? '-'),
             'category' => 'booking', 'icon' => 'calendar-plus', 'branch_name' => $branch?->name,
             'booking_id' => $booking->id, 'booking_code' => $booking->booking_code,
-            'action_url' => route('owner.dashboard'), 'created_at_label' => now()->toIso8601String(),
+            'action_url' => route('owner.bookings.index'), 'created_at_label' => now()->toIso8601String(),
         ]);
     }
 
@@ -39,7 +39,7 @@ class OwnerNotificationService
             'title' => 'Booking dibatalkan',
             'message' => sprintf('Booking %s oleh %s untuk kamar %s di cabang %s telah dibatalkan.', $booking->booking_code ?? '#'.$booking->id, $this->tenantName($booking), $booking->room?->room_code ?? '-', $branch?->name ?? '-'),
             'category' => 'booking', 'icon' => 'calendar-x', 'branch_name' => $branch?->name,
-            'booking_id' => $booking->id, 'action_url' => route('owner.dashboard'),
+            'booking_id' => $booking->id, 'action_url' => route('owner.bookings.index'),
         ]);
     }
 
