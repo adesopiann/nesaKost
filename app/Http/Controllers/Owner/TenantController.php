@@ -134,9 +134,10 @@ class TenantController extends Controller
         return view('pages.owner.tenants.index', compact('tenants', 'branches', 'search', 'branchId', 'status', 'summary'));
     }
 
-    public function show(Request $request, int $tenantId): View
+    public function show(Request $request, string $publicId): View
     {
-        $tenant = Tenant::query()->with('user')->findOrFail($tenantId);
+        $tenant = Tenant::query()->with('user')->where('public_id', $publicId)->firstOrFail();
+        $tenantId = $tenant->id;
         $hasOwnedTransaction = Tenant::query()->whereKey($tenantId)->where(function (Builder $query) use ($request) {
             $query->whereHas('bookings.room', fn (Builder $room) => $room->whereIn('branch_dorm_id', $this->ownedBranchIds($request)))
                 ->orWhereHas('rents.room', fn (Builder $room) => $room->whereIn('branch_dorm_id', $this->ownedBranchIds($request)));

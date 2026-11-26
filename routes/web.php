@@ -101,12 +101,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('fasilitas', FacilityController::class)->parameters(['fasilitas' => 'facility'])->except(['create', 'show', 'edit'])->names('facilities');
 
         Route::get('/penyewa', [TenantController::class, 'index'])->name('tenants.index');
-        Route::get('/penyewa/{tenantId}', [TenantController::class, 'show'])->whereNumber('tenantId')->name('tenants.show');
+        Route::get('/penyewa/{publicId}', [TenantController::class, 'show'])->whereUuid('publicId')->name('tenants.show');
 
         Route::resource('rooms', RoomController::class)->names('rooms');
 
         Route::patch('/housemaids/{housemaid}/status', [HousemaidController::class, 'updateStatus'])
-            ->whereNumber('housemaid')
+            ->whereUuid('housemaid')
             ->name('housemaids.status');
         Route::resource('housemaids', HousemaidController::class)->parameters(['housemaids' => 'housemaid'])->names('housemaids');
         Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])

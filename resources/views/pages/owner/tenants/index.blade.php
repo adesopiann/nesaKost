@@ -110,7 +110,7 @@
                                 <td class="px-5 py-4"><span
                                         class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $statusClasses[$tenant->derived_status] ?? 'bg-slate-100 text-slate-600' }}">{{ $statusLabels[$tenant->derived_status] ?? 'Riwayat' }}</span>
                                 </td>
-                                <td class="px-5 py-4 text-right"><a href="{{ route('owner.tenants.show', $tenant->id) }}"
+                                <td class="px-5 py-4 text-right"><a href="{{ route('owner.tenants.show', $tenant->public_id) }}"
                                         class="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#315F96] hover:bg-slate-50">Detail
                                         <i data-feather="arrow-up-right" class="h-3.5 w-3.5"></i></a></td>
                             </tr>

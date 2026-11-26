@@ -5,10 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Housemaid extends Model
 {
     protected $table = 'housemaid';
+
+    protected static function booted(): void
+    {
+        static::creating(function (Housemaid $housemaid) {
+            $housemaid->public_id ??= (string) Str::uuid();
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'public_id';
+    }
 
     protected $fillable = ['owner_id', 'fname', 'lname', 'salary', 'phone_number', 'address', 'status'];
 

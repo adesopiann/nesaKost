@@ -19,9 +19,9 @@ class HousemaidController extends Controller
         return Owner::query()->where('user_id', $request->user()->id)->firstOrFail();
     }
 
-    private function ownedHousemaid(Owner $owner, int|string $id): Housemaid
+    private function ownedHousemaid(Owner $owner, string $publicId): Housemaid
     {
-        return Housemaid::query()->where('owner_id', $owner->id)->findOrFail($id);
+        return Housemaid::query()->where('owner_id', $owner->id)->where('public_id', $publicId)->firstOrFail();
     }
 
     private function activeBranches(Owner $owner)
@@ -107,14 +107,14 @@ class HousemaidController extends Controller
         return redirect()->route('owner.housemaids.show', $housemaid)->with('success', 'Data ART berhasil ditambahkan.');
     }
 
-    public function show(Request $request, int $housemaid): View
+    public function show(Request $request, string $housemaid): View
     {
         $owner = $this->currentOwner($request);
         $housemaid = $this->ownedHousemaid($owner, $housemaid)->load('branches');
         return view('pages.owner.housemaids.show', compact('housemaid'));
     }
 
-    public function edit(Request $request, int $housemaid): View
+    public function edit(Request $request, string $housemaid): View
     {
         $owner = $this->currentOwner($request);
         $housemaid = $this->ownedHousemaid($owner, $housemaid)->load('branches');
@@ -123,7 +123,7 @@ class HousemaidController extends Controller
         return view('pages.owner.housemaids.edit', compact('housemaid', 'branches', 'selectedBranchIds'));
     }
 
-    public function update(Request $request, int $housemaid): RedirectResponse
+    public function update(Request $request, string $housemaid): RedirectResponse
     {
         $owner = $this->currentOwner($request);
         $housemaid = $this->ownedHousemaid($owner, $housemaid);
@@ -160,7 +160,7 @@ class HousemaidController extends Controller
         return redirect()->route('owner.housemaids.show', $housemaid)->with('success', 'Data ART berhasil diperbarui.');
     }
 
-    public function updateStatus(Request $request, int $housemaid): RedirectResponse
+    public function updateStatus(Request $request, string $housemaid): RedirectResponse
     {
         $owner = $this->currentOwner($request);
         $housemaid = $this->ownedHousemaid($owner, $housemaid);
@@ -182,7 +182,7 @@ class HousemaidController extends Controller
             : 'ART berhasil diaktifkan.');
     }
 
-    public function destroy(Request $request, int $housemaid): RedirectResponse
+    public function destroy(Request $request, string $housemaid): RedirectResponse
     {
         $owner = $this->currentOwner($request);
         $housemaid = $this->ownedHousemaid($owner, $housemaid);
