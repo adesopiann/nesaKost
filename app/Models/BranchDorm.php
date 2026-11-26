@@ -14,6 +14,7 @@ class BranchDorm extends Model
     protected $fillable = [
         'owner_id',
         'name',
+        'slug',
         'address',
         'latitude',
         'longitude',
@@ -21,6 +22,11 @@ class BranchDorm extends Model
         'image_path',
         'status',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     public function owner(): BelongsTo
     {

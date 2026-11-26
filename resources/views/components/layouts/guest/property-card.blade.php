@@ -1,7 +1,7 @@
 @props(['property'])
 
 <div data-motion-item data-motion-hover class="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow duration-300 hover:shadow-xl">
-    <a href="{{ route('guest.properties.show', $property->id) }}">
+    <a href="{{ route('guest.properties.show', $property) }}">
         <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
             @if($property->image_path)
                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($property->image_path) }}"

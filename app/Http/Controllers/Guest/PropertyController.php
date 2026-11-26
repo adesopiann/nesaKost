@@ -40,7 +40,7 @@ class PropertyController extends Controller
         );
     }
 
-    public function show(int $id, RoomAvailabilityService $availabilityService)
+    public function show(string $property, RoomAvailabilityService $availabilityService)
     {
         $property = BranchDorm::query()
             ->where('status', config('ekost.property_active_status', 'active'))
@@ -49,7 +49,8 @@ class PropertyController extends Controller
                 'rooms' => fn ($query) => $query
                     ->where('status', config('ekost.room_active_status', 'active')),
             ])
-            ->findOrFail($id);
+            ->where('slug', $property)
+            ->firstOrFail();
 
         foreach ($property->rooms as $room) {
             $room->availability = $availabilityService->getCurrentStatus($room);

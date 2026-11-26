@@ -33,8 +33,8 @@ Route::get('/', [HomeController::class, 'index'])
 Route::view('/untuk-pemilik', 'pages.guest.owner')
     ->name('guest.owner');
 
-Route::get('/kost/{id}', [PropertyController::class, 'show'])
-    ->whereNumber('id')
+Route::get('/kost/{property}', [PropertyController::class, 'show'])
+    ->where('property', '[A-Za-z0-9-]+')
     ->name('guest.properties.show');
 
 Route::get('/kamar/{roomCode}', [RoomDetailController::class, 'show'])

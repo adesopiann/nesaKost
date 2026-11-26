@@ -15,6 +15,7 @@ use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class BranchDormController extends Controller
 {
@@ -145,6 +146,8 @@ class BranchDormController extends Controller
                 'gender_type' => $validated['gender_type'],
                 'status' => $validated['status'],
             ]);
+
+            $branch->update(['slug' => (Str::slug($branch->name) ?: 'kost') . '-' . $branch->id]);
 
             $branch->facilities()->sync($validated['facilities'] ?? []);
 
