@@ -313,7 +313,7 @@
                                     <p class="mt-1 text-sm text-amber-800">
                                         Selesaikan pembayaran sebelum {{ $renewalBooking->expires_at?->format('d M Y, H:i') ?? '-' }} agar kamar tetap dialokasikan untukmu.
                                     </p>
-                                    <a href="{{ route('tenant.bookings.show', $renewalBooking->id) }}"
+                                    <a href="{{ route('tenant.bookings.show', $renewalBooking) }}"
                                        class="mt-3 inline-flex rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">
                                         Lihat Pembayaran
                                     </a>
@@ -353,7 +353,7 @@
                                                     Masa sewa kamu berakhir dalam {{ $daysUntilRentEnd }} hari. Kamu dapat mengajukan perpanjangan mulai sekarang hingga H-7.
                                                 @endif
                                             </p>
-                                            <a href="{{ route('tenant.rents.renewal.create', $currentRent->id) }}"
+                                            <a href="{{ route('tenant.rents.renewal.create', $currentRent) }}"
                                                class="mt-3 inline-flex items-center rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-950">
                                                 Ajukan Perpanjangan
                                             </a>

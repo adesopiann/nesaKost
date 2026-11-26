@@ -21,6 +21,12 @@ class Rent extends Model
         'total_price',
     ];
 
+    /** URL menggunakan kode sewa, bukan primary key internal. */
+    public function getRouteKeyName(): string
+    {
+        return 'rent_code';
+    }
+
     protected function casts(): array
     {
         return [

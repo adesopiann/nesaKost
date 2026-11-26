@@ -149,12 +149,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/bookings', [BookingController::class, 'store'])
                 ->name('bookings.store');
 
-            Route::get('/rents/{rentId}/renewal', [RenewalController::class, 'create'])
-                ->whereNumber('rentId')
+            Route::get('/rents/{rentCode}/renewal', [RenewalController::class, 'create'])
                 ->name('rents.renewal.create');
 
-            Route::post('/rents/{rentId}/renewal', [RenewalController::class, 'store'])
-                ->whereNumber('rentId')
+            Route::post('/rents/{rentCode}/renewal', [RenewalController::class, 'store'])
                 ->name('rents.renewal.store');
 
             Route::get('/bookings/{bookingCode}', [BookingController::class, 'show'])

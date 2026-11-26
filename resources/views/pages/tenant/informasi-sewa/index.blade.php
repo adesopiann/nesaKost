@@ -126,7 +126,7 @@
                                         @if ($renewal->status === 'pending_payment')
                                             <p class="text-sm font-semibold text-amber-900">Menunggu pembayaran perpanjangan</p>
                                             <p class="mt-1 text-sm text-amber-800">Selesaikan pembayaran sebelum {{ $renewal->expires_at?->format('d M Y, H:i') ?? 'batas waktu berakhir' }}.</p>
-                                            <a href="{{ route('tenant.bookings.show', $renewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan dan pembayaran</a>
+                                            <a href="{{ route('tenant.bookings.show', $renewal) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan dan pembayaran</a>
                                         @elseif ($renewal->status === 'confirmed' && $renewal->rent)
                                             <p class="text-sm font-semibold text-green-800">Perpanjangan berhasil dikonfirmasi</p>
                                             <p class="mt-1 text-sm text-green-800">Periode baru: {{ $renewal->rent->start_date?->format('d M Y') }} – {{ $renewal->rent->end_date?->format('d M Y') }}.</p>
@@ -141,7 +141,7 @@
                                             <p class="text-sm font-semibold text-blue-950">Periode perpanjangan tersedia</p>
                                             <p class="mt-1 text-sm text-blue-900">{{ $rent->renewal_eligibility['message'] }} Pembayaran harus diselesaikan dalam 72 jam setelah pengajuan.</p>
                                         </div>
-                                        <a href="{{ route('tenant.rents.renewal.create', $rent->id) }}" class="inline-flex shrink-0 justify-center rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-950">Ajukan Perpanjangan</a>
+                                        <a href="{{ route('tenant.rents.renewal.create', $rent) }}" class="inline-flex shrink-0 justify-center rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-950">Ajukan Perpanjangan</a>
                                     </div>
                                 @else
                                     <p class="mt-2 text-sm text-slate-600">{{ $rent->renewal_eligibility['message'] }}</p>

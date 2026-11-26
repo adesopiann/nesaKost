@@ -72,7 +72,7 @@ class RentExpirationReminderMail extends Mailable
                 'actionLabel' => $content['actionLabel'],
                 'showRenewalAction' => $content['showRenewalAction'],
                 'actionUrl' => in_array($this->reminderType, ['H-30', 'H-7'], true)
-                    ? route('tenant.rents.renewal.create', ['rentId' => $this->rent->id])
+                    ? route('tenant.rents.renewal.create', ['rentCode' => $this->rent->rent_code])
                     : route('tenant.dashboard'),
             ],
         );

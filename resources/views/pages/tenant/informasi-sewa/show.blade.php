@@ -71,7 +71,7 @@
                         @if ($latestRenewal->status === 'pending_payment' && !$renewalExpired)
                             <p class="font-semibold text-amber-900">Menunggu pembayaran</p>
                             <p class="mt-1 text-sm text-amber-800">Selesaikan pembayaran sebelum {{ $latestRenewal->expires_at?->format('d M Y, H:i') ?? '-' }}.</p>
-                            <a href="{{ route('tenant.bookings.show', $latestRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                            <a href="{{ route('tenant.bookings.show', $latestRenewal) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
                         @elseif ($latestRenewal->status === 'confirmed')
                             <p class="font-semibold text-green-800">Perpanjangan berhasil</p>
                             <p class="mt-1 text-sm text-green-800">Periode baru: {{ $latestRenewal->start_date?->format('d M Y') }} – {{ $latestRenewal->end_date?->format('d M Y') }}.</p>
@@ -84,7 +84,7 @@
                     <div class="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-5">
                         <p class="font-semibold text-blue-950">Periode perpanjangan tersedia</p>
                         <p class="mt-1 text-sm text-blue-900">{{ $renewalEligibility['message'] }} Pembayaran harus diselesaikan dalam 72 jam setelah pengajuan.</p>
-                        <a href="{{ route('tenant.rents.renewal.create', $rent->id) }}" class="mt-4 inline-flex rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-950">Ajukan Perpanjangan</a>
+                        <a href="{{ route('tenant.rents.renewal.create', $rent) }}" class="mt-4 inline-flex rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-950">Ajukan Perpanjangan</a>
                     </div>
                 @else
                     <p class="mt-2 text-sm text-slate-600">{{ $renewalEligibility['message'] }}</p>

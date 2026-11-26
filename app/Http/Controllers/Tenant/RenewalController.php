@@ -21,7 +21,7 @@ class RenewalController extends Controller
     private const DEADLINE_DAYS = 7;
     private const PAYMENT_HOURS = 72;
 
-    public function create(Request $request, int $rentId)
+    public function create(Request $request, string $rentCode)
     {
         $tenant = $request->user()->tenant;
         abort_if(!$tenant, 403);
@@ -29,7 +29,8 @@ class RenewalController extends Controller
         $rent = Rent::query()
             ->with('room.branchDorm')
             ->where('tenant_id', $tenant->id)
-            ->findOrFail($rentId);
+            ->where('rent_code', $rentCode)
+            ->firstOrFail();
 
         $eligibility = $this->eligibility($rent);
         // Satu kali percobaan renewal saja untuk setiap rent.
@@ -46,7 +47,7 @@ class RenewalController extends Controller
 
     public function store(
         Request $request,
-        int $rentId,
+        string $rentCode,
         RoomAvailabilityService $availabilityService,
         TenantRentalPeriodGuard $periodGuard
     ) {
@@ -59,7 +60,7 @@ class RenewalController extends Controller
 
         try {
             $booking = DB::transaction(function () use (
-                $tenant, $rentId, $validated, $availabilityService, $periodGuard
+                $tenant, $rentCode, $validated, $availabilityService, $periodGuard
             ) {
                 // Gunakan baris tenant sebagai mutex bersama dengan proses
                 // booking reguler agar kedua alur tidak membuat periode ganda.
@@ -68,7 +69,8 @@ class RenewalController extends Controller
                 $rent = Rent::query()
                     ->where('tenant_id', $tenant->id)
                     ->lockForUpdate()
-                    ->findOrFail($rentId);
+                    ->where('rent_code', $rentCode)
+                    ->firstOrFail();
 
                 $eligibility = $this->eligibility($rent);
                 if (!$eligibility['eligible']) {
@@ -149,7 +151,7 @@ class RenewalController extends Controller
         app(OwnerNotificationService::class)->bookingCreated($booking);
 
         return redirect()
-            ->route('tenant.bookings.show', $booking->id)
+            ->route('tenant.bookings.show', $booking)
             ->with('success', 'Pengajuan perpanjangan berhasil dibuat. Selesaikan pembayaran dalam 72 jam agar kamar tetap dialokasikan untukmu.');
     }
 

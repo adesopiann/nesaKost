@@ -25,10 +25,10 @@
                     <p class="font-semibold text-amber-900">Kesempatan renewal sudah digunakan</p>
                     @if($existingRenewal->status === 'confirmed')
                         <p class="mt-1 text-sm text-amber-800">Pengajuan perpanjangan sebelumnya sudah berhasil dikonfirmasi.</p>
-                        <a href="{{ route('tenant.bookings.show', $existingRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                        <a href="{{ route('tenant.bookings.show', $existingRenewal) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
                     @elseif($existingRenewal->status === 'pending_payment')
                         <p class="mt-1 text-sm text-amber-800">Kamu masih memiliki pengajuan perpanjangan yang menunggu pembayaran.</p>
-                        <a href="{{ route('tenant.bookings.show', $existingRenewal->id) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
+                        <a href="{{ route('tenant.bookings.show', $existingRenewal) }}" class="mt-3 inline-flex text-sm font-semibold text-blue-900 underline">Lihat pengajuan</a>
                     @else
                         <p class="mt-1 text-sm text-amber-800">Pengajuan sebelumnya berstatus {{ $existingRenewal->status }}. Kamu tidak dapat mengajukan renewal lagi untuk masa sewa ini. Jika masih ingin menyewa, silakan lakukan booking reguler melalui halaman utama setelah periode sewa saat ini berakhir.</p>
                     @endif
@@ -44,7 +44,7 @@
                     <p class="mt-1 text-sm text-blue-900">Pengajuan dibuka sampai {{ $eligibility['closes_at']->format('d M Y') }}. Setelah pengajuan dibuat, kamu memiliki waktu 72 jam untuk menyelesaikan pembayaran.</p>
                 </div>
 
-                <form method="POST" action="{{ route('tenant.rents.renewal.store', $rent->id) }}" class="mt-6 space-y-5">
+                <form method="POST" action="{{ route('tenant.rents.renewal.store', $rent) }}" class="mt-6 space-y-5">
                     @csrf
                     <div>
                         <label for="duration_month" class="mb-2 block text-sm font-semibold text-slate-800">Durasi perpanjangan</label>
