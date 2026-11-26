@@ -13,6 +13,11 @@ class Room extends Model
 {
     protected $table = 'room';
 
+    public function getRouteKeyName(): string
+    {
+        return 'room_code';
+    }
+
     protected $fillable = [
         'room_code',
         'branch_dorm_id',

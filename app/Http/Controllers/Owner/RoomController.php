@@ -32,7 +32,7 @@ class RoomController extends Controller
     /**
      * Mengambil kamar yang berada di cabang milik owner.
      */
-    private function ownedRoom(Request $request, int $id): Room
+    private function ownedRoom(Request $request, string $roomCode): Room
     {
         return Room::query()
             ->whereHas('branch', function ($query) use ($request) {
@@ -47,7 +47,8 @@ class RoomController extends Controller
                 'firstImage',
                 'facilities' => fn ($query) => $query->where('facility.facility_type', 'room')->orderBy('facility_name'),
             ])
-            ->findOrFail($id);
+            ->where('room_code', $roomCode)
+            ->firstOrFail();
     }
 
     /**
@@ -237,7 +238,7 @@ class RoomController extends Controller
     /**
      * Detail kamar.
      */
-    public function show(Request $request, int $room): View
+    public function show(Request $request, string $room): View
     {
         $room = $this->ownedRoom($request, $room);
         [$currentTransactions, $transactionHistory] = $this->roomDetailTransactions($room);
@@ -252,7 +253,7 @@ class RoomController extends Controller
     /**
      * Form edit kamar.
      */
-    public function edit(Request $request, int $room): View
+    public function edit(Request $request, string $room): View
     {
         $room = $this->ownedRoom($request, $room);
 
@@ -568,7 +569,7 @@ class RoomController extends Controller
     /**
      * Perbarui kamar.
      */
-    public function update(Request $request, int $room): RedirectResponse
+    public function update(Request $request, string $room): RedirectResponse
     {
         $room = $this->ownedRoom($request, $room);
 
@@ -690,7 +691,7 @@ class RoomController extends Controller
         });
 
         return redirect()
-            ->route('owner.rooms.show', $room->id)
+            ->route('owner.rooms.show', $room)
             ->with('success', 'Data kamar berhasil diperbarui.');
     }
 
@@ -700,7 +701,7 @@ class RoomController extends Controller
      * Kamar yang masih memiliki alokasi rent/booking saat ini atau mendatang
      * tidak boleh dinonaktifkan/diubah ke maintenance.
      */
-    public function updateStatus(Request $request, int $room): RedirectResponse
+    public function updateStatus(Request $request, string $room): RedirectResponse
     {
         $validated = $request->validate([
             'status' => ['required', Rule::in(['active', 'inactive', 'maintenance'])],
@@ -743,7 +744,7 @@ class RoomController extends Controller
     /**
      * Hapus kamar jika belum memiliki riwayat transaksi.
      */
-    public function destroy(Request $request, int $room): RedirectResponse
+    public function destroy(Request $request, string $room): RedirectResponse
     {
         $room = $this->ownedRoom($request, $room);
 

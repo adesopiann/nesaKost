@@ -15,7 +15,7 @@ class PropertyController extends Controller
      */
     public function availability(
         Request $request,
-        int $roomId,
+        string $roomCode,
         RoomAvailabilityService $availabilityService
     ) {
         $validated = $request->validate([
@@ -29,7 +29,8 @@ class PropertyController extends Controller
                 'status',
                 config('ekost.property_active_status', 'active')
             ))
-            ->findOrFail($roomId);
+            ->where('room_code', $roomCode)
+            ->firstOrFail();
 
         return response()->json(
             $availabilityService->getUnavailableRanges(

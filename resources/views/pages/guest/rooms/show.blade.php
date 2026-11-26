@@ -34,7 +34,7 @@
             <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
                 <a href="{{ route('guest.home') }}" class="hover:text-blue-900 hover:underline">Cari Kost</a>
                 <span aria-hidden="true">/</span>
-                <a href="{{ route('guest.properties.show', $branch->id) }}" class="hover:text-blue-900 hover:underline">
+                <a href="{{ route('guest.properties.show', $branch) }}" class="hover:text-blue-900 hover:underline">
                     {{ $branch->name }}
                 </a>
                 <span aria-hidden="true">/</span>
@@ -238,8 +238,7 @@
                     <form action="{{ route('guest.rooms.show', $room->room_code) }}" method="GET"
                         class="mt-5" id="room-booking-form">
                         <div data-availability-calendar
-                            data-room-id="{{ $room->id }}"
-                            data-availability-url="{{ route('guest.rooms.availability', $room->id) }}"
+                            data-availability-url="{{ route('guest.rooms.availability', $room->room_code) }}"
                             data-initial-date="{{ $selectedStartDate ?? '' }}"
                             data-initial-duration="{{ $selectedDurationMonth ?? '' }}">
                             <label for="duration_month_detail" class="text-sm font-semibold text-slate-800">
@@ -434,12 +433,30 @@
                         button.textContent = day;
                         button.className = 'h-9 rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500';
                         button.disabled = loading || past || Boolean(unavailable);
-                        if (iso === selected) button.className += ' bg-blue-900 font-semibold text-white';
-                        else if (unavailable) {
+                        // Highlight the entire proposed rental period when it is conflict-free.
+                        const selectedEnd = selected && duration.value
+                            ? periodEnd(selected, Number(duration.value))
+                            : '';
+                        const selectedConflict = selectedEnd
+                            ? conflictFor(selected, selectedEnd)
+                            : null;
+                        const inSelectedPeriod = selectedEnd && !selectedConflict
+                            && iso >= selected && iso <= selectedEnd;
+
+                        if (unavailable) {
                             button.className += ' cursor-not-allowed bg-rose-100 text-rose-400 line-through';
                             button.title = `${reasonLabel(unavailable.reason)}: ${unavailable.start} – ${unavailable.end}`;
-                        } else if (past) button.className += ' cursor-not-allowed bg-slate-100 text-slate-300';
-                        else button.className += ' bg-white text-slate-700 hover:bg-blue-50';
+                        } else if (past) {
+                            button.className += ' cursor-not-allowed bg-slate-100 text-slate-300';
+                        } else if (inSelectedPeriod && (iso === selected || iso === selectedEnd)) {
+                            button.className += ' bg-blue-900 font-semibold text-white';
+                            button.title = iso === selected ? 'Tanggal mulai periode sewa' : 'Tanggal akhir periode sewa';
+                        } else if (inSelectedPeriod) {
+                            button.className += ' bg-blue-100 font-medium text-blue-900';
+                            button.title = 'Termasuk periode sewa terpilih';
+                        } else {
+                            button.className += ' bg-white text-slate-700 hover:bg-blue-50';
+                        }
                         button.addEventListener('click', () => {
                             selected = iso;
                             dateInput.value = iso;

@@ -118,7 +118,7 @@
                                             </div>
                                         @endif
                                         <div>
-                                            <a href="{{ route('owner.rooms.show', $room->id) }}"
+                                            <a href="{{ route('owner.rooms.show', $room) }}"
                                                 class="font-semibold text-blue-900 hover:underline">
                                                 {{ $room->room_code }}
                                             </a>
@@ -145,7 +145,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
                                     <div class="inline-flex items-center justify-end gap-2">
-                                        <a href="{{ route('owner.rooms.show', $room->id) }}"
+                                        <a href="{{ route('owner.rooms.show', $room) }}"
                                             class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                             Detail
                                         </a>
@@ -158,7 +158,7 @@
                                             </summary>
                                             <div data-dropdown-menu
                                                 class="hidden w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl">
-                                                <a href="{{ route('owner.rooms.edit', $room->id) }}"
+                                                <a href="{{ route('owner.rooms.edit', $room) }}"
                                                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                                     <i data-feather="edit-2" class="h-4 w-4"></i>
                                                     Edit kamar
@@ -177,7 +177,7 @@
         ] as $statusValue => $statusLabel)
                                                     @if ($room->status !== $statusValue)
                                                         <form method="POST"
-                                                            action="{{ route('owner.rooms.update-status', $room->id) }}"
+                                                            action="{{ route('owner.rooms.update-status', $room) }}"
                                                             data-confirm-modal
                                                             data-confirm-title="Konfirmasi perubahan status"
                                                             data-confirm-message="Kamu akan mengubah status kamar {{ $room->room_code }} menjadi {{ strtolower($statusLabel) }}. Pastikan kamar tidak memiliki booking maupun penyewaan. Lanjutkan?"
@@ -198,7 +198,7 @@
                                                 <div class="my-1 border-t border-slate-100"></div>
                                                 @if (!$hasHistory)
                                                     <form method="POST"
-                                                        action="{{ route('owner.rooms.destroy', $room->id) }}"
+                                                        action="{{ route('owner.rooms.destroy', $room) }}"
                                                         data-confirm-modal data-confirm-title="Hapus kamar"
                                                         data-confirm-message="Kamar {{ $room->room_code }} akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
                                                         data-confirm-accept="Ya, hapus kamar">

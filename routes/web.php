@@ -41,8 +41,8 @@ Route::get('/kamar/{roomCode}', [RoomDetailController::class, 'show'])
     ->where('roomCode', '[A-Za-z0-9-]+')
     ->name('guest.rooms.show');
 
-Route::get('/rooms/{roomId}/availability', [PropertyController::class, 'availability'])
-    ->whereNumber('roomId')
+Route::get('/rooms/{roomCode}/availability', [PropertyController::class, 'availability'])
+    ->where('roomCode', '[A-Za-z0-9-]+')
     ->name('guest.rooms.availability');
 
 
@@ -110,7 +110,7 @@ Route::middleware('auth')->group(function () {
             ->name('housemaids.status');
         Route::resource('housemaids', HousemaidController::class)->parameters(['housemaids' => 'housemaid'])->names('housemaids');
         Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])
-            ->whereNumber('room')
+            ->where('room', '[A-Za-z0-9-]+')
             ->name('rooms.update-status');
 
         Route::get('/rents', [TransactionController::class, 'rents'])->name('rents');

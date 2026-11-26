@@ -13,7 +13,7 @@
                     <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold">{{ ucfirst($room->status) }}</span>
                 </div>
             </div>
-            <a href="{{ route('owner.rooms.edit', $room->id) }}" class="rounded-lg bg-blue-900 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800">Edit Kamar</a>
+            <a href="{{ route('owner.rooms.edit', $room) }}" class="rounded-lg bg-blue-900 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800">Edit Kamar</a>
         </div>
     </section>
     <section class="grid gap-6 lg:grid-cols-3">
